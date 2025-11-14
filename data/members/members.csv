@@ -1,0 +1,11 @@
+member_id,first_name,last_name,email,age,gender
+M001,John,Doe,john.doe@example.com,35,M
+M002,Jane,Smith,jane.smith@example.com,28,F
+M003,Mike,Johnson,mike.j@example.com,42,M
+M004,Sarah,Williams,sarah.w@example.com,31,F
+M005,Tom,Brown,tom.brown@example.com,45,M
+M006,Emily,Davis,emily.d@example.com,26,F
+M007,Chris,Wilson,chris.wilson@example.com,38,M
+M008,Lisa,Moore,lisa.moore@example.com,33,F
+M009,David,Taylor,david.t@example.com,29,M
+M010,Anna,Anderson,anna.a@example.com,37,F
