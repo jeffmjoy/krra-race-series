@@ -119,6 +119,15 @@ place,name,time,age,gender,bib_number
 - [ ] Database backend
 - [ ] REST API
 
+### Development/Tooling
+
+- [ ] Configure editor to strip trailing whitespace on save
+- [ ] Add `.editorconfig` file for consistent formatting
+- [ ] Set up pre-commit hooks (e.g., `pre-commit` framework)
+- [ ] Add `ruff` or `flake8` linter to catch whitespace issues
+- [ ] Configure Black/Ruff to handle trailing whitespace
+- [ ] Add linting step to CI/CD pipeline
+
 ## Development
 
 ### Running Tests
