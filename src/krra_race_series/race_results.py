@@ -51,17 +51,17 @@ class RaceResultsLoader:
         race_name = filepath.stem
         race_date = date.today()  # TODO: Extract from filename or file content
 
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
 
             for row in reader:
                 result = RaceResult(
-                    place=int(row.get('place', 0)),
-                    name=row.get('name', '').strip(),
-                    time=row.get('time', ''),
-                    age=int(row['age']) if row.get('age') else None,
-                    gender=row.get('gender'),
-                    bib_number=row.get('bib_number')
+                    place=int(row.get("place", 0)),
+                    name=row.get("name", "").strip(),
+                    time=row.get("time", ""),
+                    age=int(row["age"]) if row.get("age") else None,
+                    gender=row.get("gender"),
+                    bib_number=row.get("bib_number"),
                 )
                 results.append(result)
 

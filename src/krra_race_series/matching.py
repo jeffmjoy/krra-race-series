@@ -47,9 +47,7 @@ class FinisherMatcher:
         member = self.member_registry.find_by_name(race_result.name)
 
         return MatchResult(
-            race_result=race_result,
-            member=member,
-            matched=member is not None
+            race_result=race_result, member=member, matched=member is not None
         )
 
     def match_all(self, race_results: List[RaceResult]) -> List[MatchResult]:

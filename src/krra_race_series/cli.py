@@ -12,36 +12,31 @@ from .export import ResultsExporter
 
 def main() -> None:
     """Main entry point for the CLI."""
-    parser = argparse.ArgumentParser(
-        description='KRRA Race Series Scoring System'
+    parser = argparse.ArgumentParser(description="KRRA Race Series Scoring System")
+
+    parser.add_argument(
+        "--members", type=Path, required=True, help="Path to the members CSV file"
     )
 
     parser.add_argument(
-        '--members',
+        "--races",
         type=Path,
+        nargs="+",
         required=True,
-        help='Path to the members CSV file'
+        help="Path(s) to race results CSV file(s)",
     )
 
     parser.add_argument(
-        '--races',
+        "--output",
         type=Path,
-        nargs='+',
-        required=True,
-        help='Path(s) to race results CSV file(s)'
+        default=Path("data/output/series_results.csv"),
+        help="Path for the output CSV file",
     )
 
     parser.add_argument(
-        '--output',
-        type=Path,
-        default=Path('data/output/series_results.csv'),
-        help='Path for the output CSV file'
-    )
-
-    parser.add_argument(
-        '--detailed',
-        action='store_true',
-        help='Export detailed results with individual race points'
+        "--detailed",
+        action="store_true",
+        help="Export detailed results with individual race points",
     )
 
     args = parser.parse_args()
@@ -87,11 +82,13 @@ def main() -> None:
 
     print("\nTop 10 standings:")
     for i, total in enumerate(totals[:10], start=1):
-        print(f"  {i}. {total.member_name} - {total.total_points} points "
-              f"({total.races_completed} races)")
+        print(
+            f"  {i}. {total.member_name} - {total.total_points} points "
+            f"({total.races_completed} races)"
+        )
 
     print(f"\n✓ Complete! Results exported to {args.output}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

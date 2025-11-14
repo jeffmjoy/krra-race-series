@@ -46,7 +46,7 @@ def test_match_all():
     results = [
         RaceResult(place=1, name="John Doe", time="18:30"),
         RaceResult(place=2, name="Unknown Runner", time="19:00"),
-        RaceResult(place=3, name="Jane Smith", time="19:30")
+        RaceResult(place=3, name="Jane Smith", time="19:30"),
     ]
 
     matches = matcher.match_all(results)

@@ -53,8 +53,9 @@ class PointsCalculator:
         """
         self.config = config or PointsConfig()
 
-    def calculate_race_points(self, match_results: List[MatchResult],
-                            race_name: str) -> List[RacePoints]:
+    def calculate_race_points(
+        self, match_results: List[MatchResult], race_name: str
+    ) -> List[RacePoints]:
         """Calculate points for all matched finishers in a race.
 
         Args:
@@ -69,12 +70,14 @@ class PointsCalculator:
         for match in match_results:
             if match.matched and match.member:
                 points = self.config.calculate_points(match.race_result.place)
-                race_points.append(RacePoints(
-                    member_id=match.member.member_id,
-                    race_name=race_name,
-                    place=match.race_result.place,
-                    points=points
-                ))
+                race_points.append(
+                    RacePoints(
+                        member_id=match.member.member_id,
+                        race_name=race_name,
+                        place=match.race_result.place,
+                        points=points,
+                    )
+                )
 
         return race_points
 
@@ -104,7 +107,9 @@ class SeriesScoring:
         """
         self.all_race_points.extend(race_points)
 
-    def calculate_series_totals(self, member_registry: "MemberRegistry") -> List[SeriesTotal]:
+    def calculate_series_totals(
+        self, member_registry: "MemberRegistry"
+    ) -> List[SeriesTotal]:
         """Calculate cumulative totals for all members.
 
         Args:
@@ -124,8 +129,14 @@ class SeriesScoring:
         # Calculate totals
         totals = []
         for member_id, points_list in member_points.items():
-            member = next((m for m in member_registry.get_all_members()
-                          if m.member_id == member_id), None)
+            member = next(
+                (
+                    m
+                    for m in member_registry.get_all_members()
+                    if m.member_id == member_id
+                ),
+                None,
+            )
             member_name = member.full_name if member else "Unknown"
 
             total = SeriesTotal(
@@ -133,7 +144,7 @@ class SeriesScoring:
                 member_name=member_name,
                 races_completed=len(points_list),
                 total_points=sum(p.points for p in points_list),
-                race_details=points_list
+                race_details=points_list,
             )
             totals.append(total)
 

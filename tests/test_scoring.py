@@ -4,9 +4,7 @@ import pytest
 from krra_race_series.members import Member, MemberRegistry
 from krra_race_series.race_results import RaceResult
 from krra_race_series.matching import MatchResult
-from krra_race_series.scoring import (
-    PointsConfig, PointsCalculator, SeriesScoring
-)
+from krra_race_series.scoring import PointsConfig, PointsCalculator, SeriesScoring
 
 
 def test_points_calculation():
@@ -55,12 +53,12 @@ def test_series_scoring():
     match1 = MatchResult(
         race_result=RaceResult(place=1, name="John Doe", time="18:30"),
         member=member1,
-        matched=True
+        matched=True,
     )
     match2 = MatchResult(
         race_result=RaceResult(place=2, name="Jane Smith", time="19:00"),
         member=member2,
-        matched=True
+        matched=True,
     )
 
     race1_points = calculator.calculate_race_points([match1, match2], "Race 1")
@@ -70,7 +68,7 @@ def test_series_scoring():
     match3 = MatchResult(
         race_result=RaceResult(place=1, name="Jane Smith", time="18:45"),
         member=member2,
-        matched=True
+        matched=True,
     )
 
     race2_points = calculator.calculate_race_points([match3], "Race 2")

@@ -8,10 +8,7 @@ from krra_race_series.members import Member, MemberRegistry
 def test_member_creation():
     """Test creating a Member."""
     member = Member(
-        member_id="M001",
-        first_name="John",
-        last_name="Doe",
-        email="john@example.com"
+        member_id="M001", first_name="John", last_name="Doe", email="john@example.com"
     )
 
     assert member.member_id == "M001"

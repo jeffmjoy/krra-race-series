@@ -7,13 +7,7 @@ from krra_race_series.race_results import RaceResultsLoader, RaceResult
 
 def test_race_result_creation():
     """Test creating a RaceResult."""
-    result = RaceResult(
-        place=1,
-        name="John Doe",
-        time="18:30",
-        age=35,
-        gender="M"
-    )
+    result = RaceResult(place=1, name="John Doe", time="18:30", age=35, gender="M")
 
     assert result.place == 1
     assert result.name == "John Doe"
