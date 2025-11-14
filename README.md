@@ -5,6 +5,7 @@ A proof-of-concept application for automating the Kingston Road Runners Associat
 ## Overview
 
 This project automates the process of:
+
 - Ingesting race result files (CSV format)
 - Loading KRRA member lists
 - Matching race finishers with members
@@ -14,7 +15,7 @@ This project automates the process of:
 
 ## Project Structure
 
-```
+```text
 krra-race-series/
 ├── src/krra_race_series/    # Main package
 │   ├── __init__.py
@@ -38,17 +39,20 @@ krra-race-series/
 ### Installation
 
 1. Create a virtual environment:
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install dependencies:
+1. Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Install the package in development mode:
+1. Install the package in development mode:
+
 ```bash
 pip install -e .
 ```

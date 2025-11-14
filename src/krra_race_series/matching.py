@@ -1,7 +1,7 @@
 """Module for matching race finishers with KRRA members."""
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import List, Optional
 
 from .members import Member, MemberRegistry
 from .race_results import RaceResult
@@ -52,7 +52,7 @@ class FinisherMatcher:
             matched=member is not None
         )
     
-    def match_all(self, race_results: list[RaceResult]) -> list[MatchResult]:
+    def match_all(self, race_results: List[RaceResult]) -> List[MatchResult]:
         """Match all race results to KRRA members.
         
         Args:

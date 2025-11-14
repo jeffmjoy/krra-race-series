@@ -26,7 +26,7 @@ class Member:
 class MemberRegistry:
     """Manages the registry of KRRA members."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.members: List[Member] = []
     
     def load_from_csv(self, filepath: Path) -> None:

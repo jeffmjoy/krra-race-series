@@ -1,9 +1,13 @@
 """Module for calculating race series points."""
 
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Optional, TYPE_CHECKING
 
 from .matching import MatchResult
+
+if TYPE_CHECKING:
+    from .members import MemberRegistry
 
 
 @dataclass
@@ -41,7 +45,7 @@ class RacePoints:
 class PointsCalculator:
     """Calculates points for race results."""
     
-    def __init__(self, config: PointsConfig = None):
+    def __init__(self, config: Optional[PointsConfig] = None) -> None:
         """Initialize the calculator with a points configuration.
         
         Args:
@@ -89,7 +93,7 @@ class SeriesTotal:
 class SeriesScoring:
     """Manages cumulative scoring across the race series."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.all_race_points: List[RacePoints] = []
     
     def add_race_points(self, race_points: List[RacePoints]) -> None:
@@ -100,7 +104,7 @@ class SeriesScoring:
         """
         self.all_race_points.extend(race_points)
     
-    def calculate_series_totals(self, member_registry) -> List[SeriesTotal]:
+    def calculate_series_totals(self, member_registry: "MemberRegistry") -> List[SeriesTotal]:
         """Calculate cumulative totals for all members.
         
         Args:

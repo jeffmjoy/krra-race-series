@@ -36,6 +36,9 @@ krra-scoring = "krra_race_series.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+krra_race_series = ["py.typed"]
+
 [tool.black]
 line-length = 88
 target-version = ['py38']
