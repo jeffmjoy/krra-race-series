@@ -121,6 +121,9 @@ place,name,time,age,gender,bib_number
 
 ### Development/Tooling
 
+- [ ] See if any of the below are redundant or conflicting
+- [ ] Configure Copilot settings for things like auto-approved commands
+- [ ] Consider setting up agents.md, copilot-instructions.md, or similar
 - [ ] Configure editor to strip trailing whitespace on save
 - [ ] Add `.editorconfig` file for consistent formatting
 - [ ] Set up pre-commit hooks (e.g., `pre-commit` framework)
