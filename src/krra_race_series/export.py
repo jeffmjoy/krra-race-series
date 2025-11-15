@@ -2,13 +2,33 @@
 
 import csv
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from .scoring import SeriesTotal
 
 
 class ResultsExporter:
     """Exports race series results to various formats."""
+
+    @staticmethod
+    def _sanitize_csv_field(value: Any) -> Any:
+        """Sanitize a CSV field to prevent formula injection.
+
+        Args:
+            value: The value to sanitize
+
+        Returns:
+            Sanitized value safe for CSV export
+        """
+        if not isinstance(value, str):
+            return value
+
+        # Check if the string starts with formula characters
+        if value and value[0] in ("=", "+", "-", "@", "\t", "\r"):
+            # Prepend with a single quote to prevent formula execution
+            return "'" + value
+
+        return value
 
     def export_to_csv(
         self, series_totals: List[SeriesTotal], output_path: Path
@@ -22,7 +42,7 @@ class ResultsExporter:
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(output_path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
+            writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
 
             # Write header
             writer.writerow(["Rank", "Member ID", "Name", "Races", "Total Points"])
@@ -32,8 +52,8 @@ class ResultsExporter:
                 writer.writerow(
                     [
                         rank,
-                        total.member_id,
-                        total.member_name,
+                        self._sanitize_csv_field(total.member_id),
+                        self._sanitize_csv_field(total.member_name),
                         total.races_completed,
                         total.total_points,
                     ]
@@ -51,7 +71,7 @@ class ResultsExporter:
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(output_path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
+            writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
 
             # Write header
             writer.writerow(
@@ -65,9 +85,9 @@ class ResultsExporter:
                         writer.writerow(
                             [
                                 rank,
-                                total.member_id,
-                                total.member_name,
-                                race_points.race_name,
+                                self._sanitize_csv_field(total.member_id),
+                                self._sanitize_csv_field(total.member_name),
+                                self._sanitize_csv_field(race_points.race_name),
                                 race_points.place,
                                 race_points.points,
                                 total.total_points,
@@ -78,8 +98,8 @@ class ResultsExporter:
                     writer.writerow(
                         [
                             rank,
-                            total.member_id,
-                            total.member_name,
+                            self._sanitize_csv_field(total.member_id),
+                            self._sanitize_csv_field(total.member_name),
                             "",
                             "",
                             "",
