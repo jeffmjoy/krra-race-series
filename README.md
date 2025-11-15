@@ -127,7 +127,10 @@ place,name,time,age,gender,bib_number
 - [ ] Install Ruff VS Code extension (`charliermarsh.ruff`)
 - [ ] Set up pre-commit hooks (see below)
 - [ ] Investigate copilot recommended extensions, copilot-instructions.md, and agents.md
+- [ ] Figure out keybindings for opening/closing side bars when terminal is focused
+  - [ ] Also figure out how to open Copilot chat from editor
 - [ ] Add linting step to CI/CD pipeline
+- [ ] Remove this checklist when complete
 
 #### Pre-commit Hook Checklist
 
@@ -140,6 +143,7 @@ place,name,time,age,gender,bib_number
   - [ ] YAML/JSON validation
 - [ ] Run `pre-commit install` to activate hooks
 - [ ] Test with `pre-commit run --all-files`
+- [ ] Remove this checklist when complete
 
 ## Development
 
