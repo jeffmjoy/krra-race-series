@@ -51,7 +51,15 @@ krra-race-series/
     pip install -r requirements.txt
     ```
 
-3. Install the package in development mode:
+3. Set up pre-commit hooks (recommended):
+
+    ```bash
+    pre-commit install
+    ```
+
+    This will automatically run code quality checks before each commit.
+
+4. Install the package in development mode:
 
     ```bash
     pip install -e .
@@ -124,25 +132,12 @@ place,name,time,age,gender,bib_number
 - [x] Configure editor to strip trailing whitespace on save
 - [x] Add `.editorconfig` file for consistent formatting
 - [x] Replace Black with Ruff (modern, all-in-one linter/formatter)
-- [ ] Install Ruff VS Code extension (`charliermarsh.ruff`)
-- [ ] Set up pre-commit hooks (see below)
+- [x] Install Ruff VS Code extension (`charliermarsh.ruff`)
+- [x] Set up pre-commit hooks (see below)
 - [ ] Investigate copilot recommended extensions, copilot-instructions.md, and agents.md
 - [ ] Figure out keybindings for opening/closing side bars when terminal is focused
-  - [ ] Also figure out how to open Copilot chat from editor
-- [ ] Add linting step to CI/CD pipeline
-- [ ] Remove this checklist when complete
-
-#### Pre-commit Hook Checklist
-
-- [ ] Install pre-commit framework: `pip install pre-commit`
-- [ ] Create `.pre-commit-config.yaml` with:
-  - [ ] Ruff linting and formatting
-  - [ ] Trailing whitespace removal
-  - [ ] End-of-file fixer
-  - [ ] Python syntax checker
-  - [ ] YAML/JSON validation
-- [ ] Run `pre-commit install` to activate hooks
-- [ ] Test with `pre-commit run --all-files`
+  - [x] Also figure out how to open Copilot chat from editor
+- [x] Add linting step to CI/CD pipeline
 - [ ] Remove this checklist when complete
 
 ## Development
@@ -168,16 +163,17 @@ Or simply save files in VS Code (auto-format is enabled).
 
 ### Pre-commit Hooks
 
-Optional: Set up pre-commit hooks to automatically run checks before committing:
+Pre-commit hooks are configured to automatically run checks before committing:
 
-```bash
-pip install pre-commit
-pre-commit install
-```
+- Ruff linting and formatting
+- Trailing whitespace removal
+- End-of-file fixer
+- YAML/JSON/TOML validation
+- Type checking with mypy
+
+After running `pre-commit install` during setup, these checks will run automatically on every commit.
 
 **Maintenance:** Run `pre-commit autoupdate` monthly to update hook versions.
-
-See the Development/Tooling checklist for pre-commit configuration tasks.
 
 ## License
 
