@@ -175,6 +175,8 @@ pip install pre-commit
 pre-commit install
 ```
 
+**Maintenance:** Run `pre-commit autoupdate` monthly to update hook versions.
+
 See the Development/Tooling checklist for pre-commit configuration tasks.
 
 ## License
