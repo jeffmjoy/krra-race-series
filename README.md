@@ -121,15 +121,25 @@ place,name,time,age,gender,bib_number
 
 ### Development/Tooling
 
-- [ ] See if any of the below are redundant or conflicting
-- [ ] Configure Copilot settings for things like auto-approved commands
-- [ ] Consider setting up agents.md, copilot-instructions.md, or similar
-- [ ] Configure editor to strip trailing whitespace on save
-- [ ] Add `.editorconfig` file for consistent formatting
-- [ ] Set up pre-commit hooks (e.g., `pre-commit` framework)
-- [ ] Add `ruff` or `flake8` linter to catch whitespace issues
-- [ ] Configure Black/Ruff to handle trailing whitespace
+- [x] Configure editor to strip trailing whitespace on save
+- [x] Add `.editorconfig` file for consistent formatting
+- [x] Replace Black with Ruff (modern, all-in-one linter/formatter)
+- [ ] Install Ruff VS Code extension (`charliermarsh.ruff`)
+- [ ] Set up pre-commit hooks (see below)
+- [ ] Investigate copilot recommended extensions, copilot-instructions.md, and agents.md
 - [ ] Add linting step to CI/CD pipeline
+
+#### Pre-commit Hook Checklist
+
+- [ ] Install pre-commit framework: `pip install pre-commit`
+- [ ] Create `.pre-commit-config.yaml` with:
+  - [ ] Ruff linting and formatting
+  - [ ] Trailing whitespace removal
+  - [ ] End-of-file fixer
+  - [ ] Python syntax checker
+  - [ ] YAML/JSON validation
+- [ ] Run `pre-commit install` to activate hooks
+- [ ] Test with `pre-commit run --all-files`
 
 ## Development
 
@@ -141,11 +151,27 @@ pytest
 
 ### Code Style
 
-This project follows PEP 8 style guidelines. Format code with:
+This project uses Ruff for linting and formatting (replaces Black, flake8, isort, and more).
+
+Format and lint code with:
 
 ```bash
-black src/ tests/
+ruff check --fix src/ tests/
+ruff format src/ tests/
 ```
+
+Or simply save files in VS Code (auto-format is enabled).
+
+### Pre-commit Hooks
+
+Optional: Set up pre-commit hooks to automatically run checks before committing:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+See the Development/Tooling checklist for pre-commit configuration tasks.
 
 ## License
 
