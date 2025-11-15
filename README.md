@@ -116,16 +116,35 @@ place,name,time,age,gender,bib_number
 
 ## Future Enhancements
 
-- [ ] Web scraping for race results
+### MVP/POC Requirements
+
+Core functionality needed for a working proof-of-concept:
+
+1. [ ] Implement current points [scoring system](https://www.krra.org/race-series-points/)
+2. [ ] Age group and gender-based [scoring](https://www.krra.org/standings-2025/)
+3. [ ] Age graded scoring using [Runner's World Calculator](http://www.runnersworld.com/tools/age-graded-calculator)
+4. [ ] Fuzzy name matching with confidence levels to catch name variations (Jeff vs. Jeffrey, truncated last names like Mountjoy vs. Mountjoy-Stringham, etc.)
+5. [ ] Tests to compare calculated rankings against official published results from previous race series years
+6. [ ] HTML output format
+7. [ ] Revamp README
+   - [ ] Do we need a license?
+   - [ ] Proper contacts
+   - [ ] More accurate list of [current features](#current-features) (if it's even needed)
+8. [ ] Set up repo in GitHub
+9. [ ] Web scraping for race results
+10. [ ] Ability to trial different scoring schemes
+
+### Post-MVP Enhancements
+
+Features for future consideration:
+
+- [ ] Publishing rankings to krra.org website
+- [ ] Ability to update rankings remotely as soon as results are digitally available
 - [ ] Integration with timing software
-- [ ] Fuzzy name matching with confidence levels
-- [ ] Support for name variations (Jeff vs. Jeffrey)
-- [ ] HTML output format
-- [ ] Web dashboard
-- [ ] Age group scoring
-- [ ] Gender-based divisions
-- [ ] Database backend
-- [ ] REST API
+- [ ] Ability to export as PDF
+- [ ] Tracking for Kingston Kids Running Series ([KKRS](https://www.krra.org/kingston-kids-running-series/))?
+- [ ] Database backend?
+- [ ] REST API?
 
 ### Development/Tooling
 
