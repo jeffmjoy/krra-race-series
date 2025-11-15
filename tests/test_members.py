@@ -1,7 +1,5 @@
 """Tests for members module."""
 
-import pytest
-from pathlib import Path
 from krra_race_series.members import Member, MemberRegistry
 
 

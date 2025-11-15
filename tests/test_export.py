@@ -1,10 +1,9 @@
 """Tests for export module."""
 
-import pytest
 import csv
-from pathlib import Path
-from krra_race_series.scoring import SeriesTotal, RacePoints
+
 from krra_race_series.export import ResultsExporter
+from krra_race_series.scoring import SeriesTotal
 
 
 def test_export_to_csv(tmp_path):
@@ -33,7 +32,7 @@ def test_export_to_csv(tmp_path):
 
     assert output_path.exists()
 
-    with open(output_path, "r") as f:
+    with open(output_path) as f:
         reader = csv.reader(f)
         rows = list(reader)
 

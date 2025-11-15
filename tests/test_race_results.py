@@ -1,8 +1,10 @@
 """Tests for race results module."""
 
-import pytest
 from pathlib import Path
-from krra_race_series.race_results import RaceResultsLoader, RaceResult
+
+import pytest
+
+from krra_race_series.race_results import RaceResult, RaceResultsLoader
 
 
 def test_race_result_creation():

@@ -1,8 +1,9 @@
 """Module for calculating race series points."""
 
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from .matching import MatchResult
 
@@ -45,7 +46,7 @@ class RacePoints:
 class PointsCalculator:
     """Calculates points for race results."""
 
-    def __init__(self, config: Optional[PointsConfig] = None) -> None:
+    def __init__(self, config: PointsConfig | None = None) -> None:
         """Initialize the calculator with a points configuration.
 
         Args:
@@ -54,8 +55,8 @@ class PointsCalculator:
         self.config = config or PointsConfig()
 
     def calculate_race_points(
-        self, match_results: List[MatchResult], race_name: str
-    ) -> List[RacePoints]:
+        self, match_results: list[MatchResult], race_name: str
+    ) -> list[RacePoints]:
         """Calculate points for all matched finishers in a race.
 
         Args:
@@ -90,16 +91,16 @@ class SeriesTotal:
     member_name: str
     races_completed: int
     total_points: int
-    race_details: List[RacePoints]
+    race_details: list[RacePoints]
 
 
 class SeriesScoring:
     """Manages cumulative scoring across the race series."""
 
     def __init__(self) -> None:
-        self.all_race_points: List[RacePoints] = []
+        self.all_race_points: list[RacePoints] = []
 
-    def add_race_points(self, race_points: List[RacePoints]) -> None:
+    def add_race_points(self, race_points: list[RacePoints]) -> None:
         """Add points from a race to the series.
 
         Args:
@@ -108,8 +109,8 @@ class SeriesScoring:
         self.all_race_points.extend(race_points)
 
     def calculate_series_totals(
-        self, member_registry: "MemberRegistry"
-    ) -> List[SeriesTotal]:
+        self, member_registry: MemberRegistry
+    ) -> list[SeriesTotal]:
         """Calculate cumulative totals for all members.
 
         Args:
@@ -119,7 +120,7 @@ class SeriesScoring:
             List of series totals sorted by total points (descending)
         """
         # Group points by member
-        member_points: Dict[str, List[RacePoints]] = {}
+        member_points: dict[str, list[RacePoints]] = {}
 
         for race_point in self.all_race_points:
             if race_point.member_id not in member_points:

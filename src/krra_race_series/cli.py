@@ -3,11 +3,11 @@
 import argparse
 from pathlib import Path
 
+from .export import ResultsExporter
+from .matching import FinisherMatcher
 from .members import MemberRegistry
 from .race_results import RaceResultsLoader
-from .matching import FinisherMatcher
 from .scoring import PointsCalculator, SeriesScoring
-from .export import ResultsExporter
 
 
 def main() -> None:

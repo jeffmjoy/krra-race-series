@@ -1,10 +1,9 @@
 """Tests for scoring module."""
 
-import pytest
+from krra_race_series.matching import MatchResult
 from krra_race_series.members import Member, MemberRegistry
 from krra_race_series.race_results import RaceResult
-from krra_race_series.matching import MatchResult
-from krra_race_series.scoring import PointsConfig, PointsCalculator, SeriesScoring
+from krra_race_series.scoring import PointsCalculator, PointsConfig, SeriesScoring
 
 
 def test_points_calculation():

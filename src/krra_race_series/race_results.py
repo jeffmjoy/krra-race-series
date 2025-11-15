@@ -51,7 +51,7 @@ class RaceResultsLoader:
         race_name = filepath.stem
         race_date = date.today()  # TODO: Extract from filename or file content
 
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             reader = csv.DictReader(f)
 
             for row in reader:

@@ -1,9 +1,8 @@
 """Tests for matching module."""
 
-import pytest
+from krra_race_series.matching import FinisherMatcher
 from krra_race_series.members import Member, MemberRegistry
 from krra_race_series.race_results import RaceResult
-from krra_race_series.matching import FinisherMatcher
 
 
 def test_match_finisher_success():
