@@ -3,6 +3,10 @@
 ## Project Overview
 This is a Python application for automating race series scoring for the Kingston Road Runners Association. The project emphasizes code quality, type safety, and comprehensive testing.
 
+## Virtual Environment
+
+**When starting a new terminal session:** Activate `.venv/` once before running Python/pip commands. Once activated, all subsequent commands use the virtual environment automatically.
+
 ## Python Version
 
 - **Required:** Python 3.8+

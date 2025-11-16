@@ -1,25 +1,16 @@
 # Agent Instructions for KRRA Race Series
 
-## Critical: Virtual Environment
+## Virtual Environment
 
-**⚠️ ALWAYS activate the virtual environment before running Python commands!**
+This project uses a virtual environment at `.venv/` in the project root.
 
-The virtual environment is located at `.venv/` in the project root.
-
-### Activate the virtual environment
+**When starting a new terminal session:** Activate the virtual environment once before running Python commands:
 
 ```bash
 source .venv/bin/activate
 ```
 
-### Verify activation
-
-Check that you're using the project's Python interpreter:
-
-```bash
-which python
-# Should show a path ending in: .venv/bin/python
-```
+Once activated, all subsequent commands in that terminal session will use the virtual environment automatically. You don't need to re-activate for each command.
 
 ### If virtual environment doesn't exist, create it
 
