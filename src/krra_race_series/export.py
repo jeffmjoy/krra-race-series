@@ -75,21 +75,40 @@ class ResultsExporter:
 
             # Write header
             writer.writerow(
-                ["Rank", "Member ID", "Name", "Race", "Place", "Points", "Total Points"]
+                [
+                    "Rank",
+                    "Member ID",
+                    "Name",
+                    "Race",
+                    "Overall Place",
+                    "Overall Points",
+                    "Age Group",
+                    "Age Group Place",
+                    "Age Group Points",
+                    "Race Total",
+                    "Series Total",
+                ]
             )
 
             # Write data
             for rank, total in enumerate(series_totals, start=1):
                 if total.race_details:
                     for race_points in total.race_details:
+                        age_group_str = (
+                            race_points.age_group.value if race_points.age_group else ""
+                        )
                         writer.writerow(
                             [
                                 rank,
                                 self._sanitize_csv_field(total.member_id),
                                 self._sanitize_csv_field(total.member_name),
                                 self._sanitize_csv_field(race_points.race_name),
-                                race_points.place,
-                                race_points.points,
+                                race_points.overall_place,
+                                race_points.overall_points,
+                                age_group_str,
+                                race_points.age_group_place or "",
+                                race_points.age_group_points,
+                                race_points.total_points,
                                 total.total_points,
                             ]
                         )
@@ -100,6 +119,10 @@ class ResultsExporter:
                             rank,
                             self._sanitize_csv_field(total.member_id),
                             self._sanitize_csv_field(total.member_name),
+                            "",
+                            "",
+                            "",
+                            "",
                             "",
                             "",
                             "",
