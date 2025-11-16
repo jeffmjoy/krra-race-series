@@ -1,18 +1,24 @@
 # Agent Instructions for KRRA Race Series
 
-## Virtual Environment
+## Virtual Environment Setup
 
-This project uses a virtual environment at `.venv/` in the project root.
+This project uses a virtual environment at `.venv/`.
 
-**When starting a new terminal session:** Activate the virtual environment once before running Python commands:
+**First command in a new terminal:** If the terminal doesn't have the venv activated yet, run:
 
 ```bash
 source .venv/bin/activate
 ```
 
-Once activated, all subsequent commands in that terminal session will use the virtual environment automatically. You don't need to re-activate for each command.
+**All subsequent commands** in that same terminal can be run directly without re-activating:
+- `pytest` ✓
+- `ruff check --fix src/ tests/` ✓
+- `mypy src/` ✓
+- `pip install package-name` ✓
 
-### If virtual environment doesn't exist, create it
+The terminal persists the activation, so DO NOT prepend `source .venv/bin/activate &&` to every command.
+
+### If virtual environment doesn't exist
 
 ```bash
 python3 -m venv .venv
@@ -122,19 +128,15 @@ When adding a new package:
    - Runtime dependencies: add to `dependencies = [...]`
    - Dev dependencies: add to `[project.optional-dependencies]` under `dev = [...]`
 
-## Common Issues
-
-### "ModuleNotFoundError" when running Python
-
-→ Virtual environment not activated. Run `source .venv/bin/activate`
-
-### "command not found: pytest" or similar
-
-→ Virtual environment not activated or dependencies not installed
+## Troubleshooting
 
 ### Pre-commit hooks failing
 
 → Run `ruff check --fix` and `ruff format` to auto-fix most issues
+
+### Command not found (pytest, ruff, etc.)
+
+→ Activate venv once: `source .venv/bin/activate`, then retry
 
 ## Pre-commit Hook Behavior
 

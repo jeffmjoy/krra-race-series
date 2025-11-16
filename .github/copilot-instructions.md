@@ -5,7 +5,12 @@ This is a Python application for automating race series scoring for the Kingston
 
 ## Virtual Environment
 
-**When starting a new terminal session:** Activate `.venv/` once before running Python/pip commands. Once activated, all subsequent commands use the virtual environment automatically.
+**First terminal command only:** If starting a fresh terminal, activate `.venv/` once:
+```bash
+source .venv/bin/activate
+```
+
+**After activation:** Run all Python commands directly (`pytest`, `pip install`, `mypy`, etc.) without re-activating. The terminal session persists the venv state.
 
 ## Python Version
 
