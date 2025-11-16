@@ -63,7 +63,7 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"  # Mypy 1.5+ requires 3.9, but still checks 3.8-compatible code
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

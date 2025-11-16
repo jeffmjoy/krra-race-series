@@ -10,30 +10,6 @@ import pytest
 from krra_race_series.cli import main
 
 
-@pytest.fixture
-def sample_members_csv(tmp_path):
-    """Create a sample members CSV file."""
-    members_file = tmp_path / "members.csv"
-    members_file.write_text(
-        "member_id,first_name,last_name,email,age,gender\n"
-        "M001,John,Doe,john@example.com,35,M\n"
-        "M002,Jane,Smith,jane@example.com,28,F\n"
-    )
-    return members_file
-
-
-@pytest.fixture
-def sample_race_csv(tmp_path):
-    """Create a sample race results CSV file."""
-    race_file = tmp_path / "spring_5k.csv"
-    race_file.write_text(
-        "place,name,time,age,gender,bib_number\n"
-        "1,John Doe,18:30,35,M,101\n"
-        "2,Jane Smith,19:45,28,F,102\n"
-    )
-    return race_file
-
-
 def test_main_basic_execution(tmp_path, sample_members_csv, sample_race_csv):
     """Test basic CLI execution with required arguments."""
     output_file = tmp_path / "results.csv"

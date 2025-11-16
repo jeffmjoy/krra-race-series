@@ -26,7 +26,7 @@ This is a Python application for automating race series scoring for the Kingston
 - **Write pytest tests for all new functionality**
 - **Target: 90%+ code coverage** as a reasonable baseline for quality
 - Test files should mirror source structure: `src/krra_race_series/scoring.py` → `tests/test_scoring.py`
-- Use fixtures defined in `tests/conftest.py` for common test data
+- Define and use shared fixtures in `tests/conftest.py` for common test data; inline fixtures are fine for test-specific setup
 - Include edge cases and error conditions
 - Example test structure:
   ```python
@@ -50,7 +50,7 @@ This is a Python application for automating race series scoring for the Kingston
 
 - Prefer dataclasses for structured data (see existing patterns in the codebase)
 - Use `@dataclass` from the `dataclasses` module
-- Make dataclasses frozen when appropriate for immutability
+- Consider using `frozen=True` for immutable data structures when it improves code clarity, but prefer simplicity over strictness
 
 ### Error Handling
 
@@ -91,6 +91,6 @@ Pre-commit hooks will automatically run, but you can manually check:
 ```bash
 ruff check --fix src/ tests/
 ruff format src/ tests/
-mypy src/
+mypy src/  # Note: Configured for Python 3.9+ but checks 3.8-compatible code
 pytest
 ```
