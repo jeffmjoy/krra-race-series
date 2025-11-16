@@ -147,7 +147,7 @@ Features for future consideration:
 - [x] Replace Black with Ruff (modern, all-in-one linter/formatter)
 - [x] Install Ruff VS Code extension (`charliermarsh.ruff`)
 - [x] Set up pre-commit hooks (see below)
-- [ ] Investigate copilot recommended extensions, copilot-instructions.md, and agents.md
+- [x] Investigate copilot recommended extensions, copilot-instructions.md, and agents.md
 - [ ] Figure out keybindings for opening/closing side bars when terminal is focused
   - [x] Also figure out how to open Copilot chat from editor
 - [x] Add linting step to CI/CD pipeline
