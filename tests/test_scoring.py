@@ -261,3 +261,57 @@ def test_series_scoring_multiple_members():
     assert totals[1].member_id == "M001"
     assert totals[1].total_points == 90
     assert totals[1].races_completed == 1
+
+
+def test_calculate_race_points_with_unmatched_results():
+    """Test that unmatched results are skipped when calculating race points."""
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    member1 = Member(
+        member_id="M001", first_name="John", last_name="Doe", age=35, gender="M"
+    )
+
+    # Create a matched result and an unmatched result
+    match1 = MatchResult(
+        race_result=RaceResult(place=1, name="John Doe", time="18:30"),
+        member=member1,
+        matched=True,
+    )
+    match2 = MatchResult(
+        race_result=RaceResult(place=2, name="Unknown Runner", time="19:00"),
+        member=None,
+        matched=False,
+    )
+
+    race_points = calculator.calculate_race_points([match1, match2], "Test Race")
+
+    # Should only have points for the matched result
+    assert len(race_points) == 1
+    assert race_points[0].member_id == "M001"
+
+
+def test_calculate_race_points_with_matched_but_no_member():
+    """Test edge case where matched=True but member=None (defensive check)."""
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    member1 = Member(
+        member_id="M001", first_name="John", last_name="Doe", age=35, gender="M"
+    )
+
+    # Create normal match and edge case match (matched=True but member=None)
+    match1 = MatchResult(
+        race_result=RaceResult(place=1, name="John Doe", time="18:30"),
+        member=member1,
+        matched=True,
+    )
+    match2 = MatchResult(
+        race_result=RaceResult(place=2, name="Edge Case", time="19:00"),
+        member=None,
+        matched=True,  # Unusual: marked as matched but no member
+    )
+
+    race_points = calculator.calculate_race_points([match1, match2], "Test Race")
+
+    # Should only have points for match with actual member
+    assert len(race_points) == 1
+    assert race_points[0].member_id == "M001"

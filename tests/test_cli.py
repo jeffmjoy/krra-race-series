@@ -1,5 +1,6 @@
 """Tests for CLI module."""
 
+import subprocess
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -274,3 +275,39 @@ def test_main_with_nonexistent_race_file(tmp_path, sample_members_csv):
 
     with patch.object(sys, "argv", test_args), pytest.raises(FileNotFoundError):
         main()
+
+
+def test_cli_module_main_block(tmp_path, sample_members_csv, sample_race_csv):
+    """Test the if __name__ == '__main__' block by running the module."""
+    output_file = tmp_path / "results.csv"
+
+    # Create a test script that imports and runs the CLI module's main block
+    test_script = tmp_path / "run_cli.py"
+    test_script.write_text(
+        f"""
+import sys
+sys.path.insert(0, '{Path(__file__).parent.parent / "src"}')
+
+# Set up command line arguments
+sys.argv = [
+    'cli.py',
+    '--members', '{sample_members_csv}',
+    '--races', '{sample_race_csv}',
+    '--output', '{output_file}'
+]
+
+# Import and run the CLI module as if it were executed directly
+if __name__ == '__main__':
+    from krra_race_series import cli
+    cli.main()
+"""
+    )
+
+    # Run the script
+    result = subprocess.run(
+        [sys.executable, str(test_script)], capture_output=True, text=True
+    )
+
+    # Verify it executed successfully
+    assert result.returncode == 0
+    assert output_file.exists()
