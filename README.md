@@ -41,14 +41,14 @@ krra-race-series/
 1. Create a virtual environment:
 
     ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    python -m venv .venv
+    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
     ```
 
-2. Install dependencies:
+2. Install the package with development dependencies:
 
     ```bash
-    pip install -r requirements.txt
+    pip install -e ".[dev]"
     ```
 
 3. Set up pre-commit hooks (recommended):
@@ -58,12 +58,6 @@ krra-race-series/
     ```
 
     This will automatically run code quality checks before each commit.
-
-4. Install the package in development mode:
-
-    ```bash
-    pip install -e .
-    ```
 
 ### Usage
 

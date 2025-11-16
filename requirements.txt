@@ -1,8 +1,0 @@
-# Core dependencies
-# No external dependencies required for basic functionality
-
-# Development dependencies
-pytest>=7.4.0
-pytest-cov>=4.1.0
-ruff>=0.8.0
-mypy>=1.5.0
