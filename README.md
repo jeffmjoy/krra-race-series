@@ -98,60 +98,14 @@ place,name,time,age,gender,bib_number
 2,Jane Smith,19:45,28,F,102
 ```
 
-## Current Features
+## Features
 
-- ✅ CSV-based race result ingestion
-- ✅ CSV-based member list management
-- ✅ Exact name matching for finisher-to-member association
-- ✅ Configurable points system (default: 100 pts for 1st, decreasing by 1)
-- ✅ Cumulative series totals
-- ✅ CSV export (summary and detailed formats)
-- ✅ Command-line interface
-
-## Future Enhancements
-
-### MVP/POC Requirements
-
-Core functionality needed for a working proof-of-concept:
-
-1. [ ] Implement current points [scoring system](https://www.krra.org/race-series-points/)
-2. [ ] Age group and gender-based [scoring](https://www.krra.org/standings-2025/)
-3. [ ] Age graded scoring using [Runner's World Calculator](http://www.runnersworld.com/tools/age-graded-calculator)
-4. [ ] Fuzzy name matching with confidence levels to catch name variations (Jeff vs. Jeffrey, truncated last names like Mountjoy vs. Mountjoy-Stringham, etc.)
-5. [ ] Tests to compare calculated rankings against official published results from previous race series years
-6. [ ] HTML output format
-7. [ ] Revamp README
-   - [ ] Do we need a license?
-   - [ ] Proper contacts
-   - [ ] More accurate list of [current features](#current-features) (if it's even needed)
-8. [ ] Set up repo in GitHub
-9. [ ] Web scraping for race results
-10. [ ] Ability to trial different scoring schemes
-
-### Post-MVP Enhancements
-
-Features for future consideration:
-
-- [ ] Publishing rankings to krra.org website
-- [ ] Ability to update rankings remotely as soon as results are digitally available
-- [ ] Integration with timing software
-- [ ] Ability to export as PDF
-- [ ] Tracking for Kingston Kids Running Series ([KKRS](https://www.krra.org/kingston-kids-running-series/))?
-- [ ] Database backend?
-- [ ] REST API?
-
-### Development/Tooling
-
-- [x] Configure editor to strip trailing whitespace on save
-- [x] Add `.editorconfig` file for consistent formatting
-- [x] Replace Black with Ruff (modern, all-in-one linter/formatter)
-- [x] Install Ruff VS Code extension (`charliermarsh.ruff`)
-- [x] Set up pre-commit hooks (see below)
-- [x] Investigate copilot recommended extensions, copilot-instructions.md, and agents.md
-- [ ] Figure out keybindings for opening/closing side bars when terminal is focused
-  - [x] Also figure out how to open Copilot chat from editor
-- [x] Add linting step to CI/CD pipeline
-- [ ] Remove this checklist when complete
+- CSV-based race result ingestion and member list management
+- Name-based matching of race finishers to KRRA members
+- Points-based scoring system
+- Series totals and standings
+- CSV export with summary and detailed formats
+- Command-line interface
 
 ## Development
 
