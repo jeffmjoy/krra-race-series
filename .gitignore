@@ -34,6 +34,7 @@ venv.bak/
 # IDEs
 .vscode/
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
@@ -53,6 +54,9 @@ htmlcov/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Ruff
+.ruff_cache/
 
 # Jupyter Notebook
 .ipynb_checkpoints

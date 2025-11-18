@@ -22,6 +22,7 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-json
+        exclude: '^\.vscode/.*\.json$'  # VS Code settings support comments (JSONC)
       - id: check-added-large-files
       - id: check-merge-conflict
       - id: check-toml
