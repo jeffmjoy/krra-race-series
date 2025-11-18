@@ -4,19 +4,28 @@
 
 This project uses a virtual environment at `.venv/`.
 
-**First command in a new terminal:** If the terminal doesn't have the venv activated yet, run:
+### Each new terminal session requires one-time activation
+
+Before running Python development commands (`pytest`, `ruff`, `mypy`, `pip`, etc.) in a new terminal, activate the venv:
 
 ```bash
 source .venv/bin/activate
 ```
 
-**All subsequent commands** in that same terminal can be run directly without re-activating:
+**After activation in that terminal session:** All subsequent commands can be run directly without re-activating:
+
 - `pytest` ✓
 - `ruff check --fix src/ tests/` ✓
 - `mypy src/` ✓
 - `pip install package-name` ✓
+- `pre-commit run --all-files` ✓
+- `krra-scoring --help` ✓
 
-The terminal persists the activation, so DO NOT prepend `source .venv/bin/activate &&` to every command.
+**Best practice for terminal commands:**
+
+- For the first Python command in a new terminal: `source .venv/bin/activate && command`
+- For subsequent commands in the same terminal: run commands directly (venv persists)
+- DO NOT prepend activation to every command once the terminal has been activated
 
 ### If virtual environment doesn't exist
 

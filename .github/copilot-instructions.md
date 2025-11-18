@@ -5,12 +5,26 @@ This is a Python application for automating race series scoring for the Kingston
 
 ## Virtual Environment
 
-**First terminal command only:** If starting a fresh terminal, activate `.venv/` once:
+**IMPORTANT: New terminal sessions require activation**
+
+When running Python development commands (`pytest`, `ruff`, `mypy`, `pip`, etc.) in a new terminal session, you MUST activate the virtual environment first:
+
 ```bash
 source .venv/bin/activate
 ```
 
-**After activation:** Run all Python commands directly (`pytest`, `pip install`, `mypy`, etc.) without re-activating. The terminal session persists the venv state.
+**After activation in that terminal:** All subsequent commands in the same terminal session can be run directly without re-activating:
+- `pytest` ✓
+- `ruff check --fix src/ tests/` ✓
+- `mypy src/` ✓
+- `pip install package-name` ✓
+- `pre-commit run --all-files` ✓
+- `krra-scoring --help` ✓
+
+**How to detect if activation is needed:**
+- If you get "command not found" for `pytest`, `ruff`, or `mypy`, the terminal needs activation
+- Safe approach: prefix the first command with `source .venv/bin/activate && command`
+- The terminal session persists the venv state, so don't re-activate for subsequent commands
 
 ## Python Version
 
@@ -98,6 +112,10 @@ source .venv/bin/activate
 Pre-commit hooks will automatically run, but you can manually check:
 
 ```bash
+# Activate venv if this is a new terminal session
+source .venv/bin/activate
+
+# Then run checks (no need to re-activate for each command)
 ruff check --fix src/ tests/
 ruff format src/ tests/
 mypy src/  # Note: Configured for Python 3.9+ but checks 3.8-compatible code
