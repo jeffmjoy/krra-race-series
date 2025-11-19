@@ -53,11 +53,16 @@ jobs:
       - name: Run Snyk security scan
         if: matrix.python-version == '3.13'
         uses: snyk/actions/python@master
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload Snyk results to GitHub Code Scanning
+        if: matrix.python-version == '3.13'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
 
       - name: Upload coverage to Codecov (optional)
         if: matrix.python-version == '3.13'
