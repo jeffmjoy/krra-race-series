@@ -1,0 +1,68 @@
+name: Python Version Check
+
+on:
+  schedule:
+    # Run monthly on the 1st at 9:00 UTC
+    - cron: '0 9 1 * *'
+  workflow_dispatch: # Allow manual triggers
+  pull_request:
+    paths:
+      - 'pyproject.toml'
+      - '.github/workflows/python-version-check.yml'
+
+jobs:
+  check-python-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          pip install requests packaging
+
+      - name: Check Python EOL status
+        run: python .github/scripts/check_python_eol.py
+
+      - name: Create issue if versions need attention
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'python-version-report.txt';
+
+            if (fs.existsSync(reportPath)) {
+              const report = fs.readFileSync(reportPath, 'utf8');
+
+              // Check if an issue already exists
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                labels: 'python-version-update'
+              });
+
+              if (issues.data.length === 0) {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: '⚠️ Python Version Update Required',
+                  body: report,
+                  labels: ['python-version-update', 'dependencies']
+                });
+              } else {
+                // Update existing issue
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issues.data[0].number,
+                  body: `## Updated Report (${new Date().toISOString().split('T')[0]})\n\n${report}`
+                });
+              }
+            }

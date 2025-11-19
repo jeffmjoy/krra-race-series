@@ -29,6 +29,9 @@ dev = [
     "mypy>=1.5.0",
     "bandit>=1.7.5",
     "pip-audit>=2.6.0",  # Dependency vulnerability scanning
+    "requests>=2.31.0",  # For Python EOL check script
+    "packaging>=23.0",   # For Python version comparison
+    "types-requests>=2.31.0",  # Type stubs for requests (mypy)
 ]
 
 [project.scripts]

@@ -121,6 +121,22 @@ ruff format src/ tests/
 
 Or simply save files in VS Code (auto-format is enabled).
 
+### Python Version Management
+
+The project includes automated monitoring of Python version EOL (End-of-Life) status:
+
+- **Automated checks** run monthly via GitHub Actions
+- **Alerts** when your minimum Python version is EOL or approaching EOL
+- **Recommendations** for upgrading to newer stable versions
+
+To manually check Python EOL status:
+
+```bash
+python .github/scripts/check_python_eol.py
+```
+
+See [docs/PYTHON_VERSION_MANAGEMENT.md](docs/PYTHON_VERSION_MANAGEMENT.md) for details.
+
 ### Pre-commit Hooks
 
 Pre-commit hooks are configured to automatically run checks before committing:
