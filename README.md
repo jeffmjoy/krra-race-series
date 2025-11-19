@@ -95,7 +95,7 @@ place,name,time,age,gender,bib_number
 krra-race-series/
 ├── src/krra_race_series/    # Main package source code
 ├── tests/                   # Test files
-└── data/                    # Data files (not in version control)
+└── data/                    # Sample data files for testing
 ```
 
 See [pyproject.toml](pyproject.toml) for full package configuration and dependencies.
