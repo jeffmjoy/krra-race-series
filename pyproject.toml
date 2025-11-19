@@ -7,7 +7,7 @@ name = "krra-race-series"
 version = "0.1.0"
 description = "KRRA Race Series Scoring System - POC for automating race series scoring"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<4.0"
 authors = [
     {name = "KRRA", email = "info@krra.org"}
 ]
