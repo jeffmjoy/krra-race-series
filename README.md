@@ -2,6 +2,9 @@
 
 A proof-of-concept application for automating the Kingston Road Runners Association (KRRA) race series scoring.
 
+> [!NOTE]
+> This is an early-stage proof-of-concept project under active development.
+
 ## Overview
 
 This project automates the process of:
@@ -13,26 +16,14 @@ This project automates the process of:
 - Generating cumulative series totals
 - Exporting results to CSV
 
-## Project Structure
+## Key Features
 
-```text
-krra-race-series/
-├── src/krra_race_series/    # Main package
-│   ├── __init__.py
-│   ├── race_results.py      # Race results ingestion
-│   ├── members.py           # Member management
-│   ├── matching.py          # Finisher-to-member matching
-│   ├── scoring.py           # Points calculation
-│   ├── export.py            # Results export
-│   └── cli.py               # Command-line interface
-├── tests/                   # Test files
-├── data/                    # Data files
-│   ├── race_results/        # Race CSV files
-│   ├── members/             # Member CSV files
-│   └── output/              # Generated results
-├── config/                  # Configuration files
-└── README.md
-```
+- 📊 CSV-based race result ingestion
+- 🔗 Automated finisher-to-member matching
+- 🏆 Points-based scoring system
+- 📈 Series totals and standings
+- 💾 CSV export with summary and detailed formats
+- 🖥️ Command-line interface
 
 ## Getting Started
 
@@ -98,14 +89,16 @@ place,name,time,age,gender,bib_number
 2,Jane Smith,19:45,28,F,102
 ```
 
-## Features
+## Project Structure
 
-- CSV-based race result ingestion and member list management
-- Name-based matching of race finishers to KRRA members
-- Points-based scoring system
-- Series totals and standings
-- CSV export with summary and detailed formats
-- Command-line interface
+```text
+krra-race-series/
+├── src/krra_race_series/    # Main package source code
+├── tests/                   # Test files
+└── data/                    # Data files (not in version control)
+```
+
+See [pyproject.toml](pyproject.toml) for full package configuration and dependencies.
 
 ## Development
 
@@ -142,10 +135,31 @@ After running `pre-commit install` during setup, these checks will run automatic
 
 **Maintenance:** Run `pre-commit autoupdate` monthly to update hook versions.
 
+## Contributing
+
+This is currently a proof-of-concept project. If you'd like to contribute:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Make your changes and add tests
+4. Ensure all tests pass and code is properly formatted
+5. Submit a pull request
+
+Please ensure your code:
+
+- Includes type hints
+- Has test coverage (target 90%+)
+- Passes Ruff linting and formatting
+- Passes mypy type checking
+
 ## License
 
-MIT License (or your preferred license)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
-Kingston Road Runners Association
+Kingston Road Runners Association - [www.krra.org](https://www.krra.org)
+
+## Acknowledgments
+
+Built for the Kingston Road Runners Association race series scoring automation.
