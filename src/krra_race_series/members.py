@@ -3,7 +3,6 @@
 import csv
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
 
 
 @dataclass
@@ -13,9 +12,9 @@ class Member:
     member_id: str
     first_name: str
     last_name: str
-    email: Optional[str] = None
-    age: Optional[int] = None
-    gender: Optional[str] = None
+    email: str | None = None
+    age: int | None = None
+    gender: str | None = None
 
     @property
     def full_name(self) -> str:
@@ -27,7 +26,7 @@ class MemberRegistry:
     """Manages the registry of KRRA members."""
 
     def __init__(self) -> None:
-        self.members: List[Member] = []
+        self.members: list[Member] = []
 
     def load_from_csv(self, filepath: Path) -> None:
         """Load members from a CSV file.
@@ -57,7 +56,7 @@ class MemberRegistry:
                 )
                 self.members.append(member)
 
-    def find_by_name(self, name: str) -> Optional[Member]:
+    def find_by_name(self, name: str) -> Member | None:
         """Find a member by their full name (exact match).
 
         Args:
@@ -74,6 +73,6 @@ class MemberRegistry:
 
         return None
 
-    def get_all_members(self) -> List[Member]:
+    def get_all_members(self) -> list[Member]:
         """Return all members in the registry."""
         return self.members.copy()

@@ -4,7 +4,6 @@ import csv
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import List, Optional
 
 
 @dataclass
@@ -14,9 +13,9 @@ class RaceResult:
     place: int
     name: str
     time: str
-    age: Optional[int] = None
-    gender: Optional[str] = None
-    bib_number: Optional[str] = None
+    age: int | None = None
+    gender: str | None = None
+    bib_number: str | None = None
 
 
 @dataclass
@@ -25,7 +24,7 @@ class Race:
 
     name: str
     date: date
-    results: List[RaceResult]
+    results: list[RaceResult]
 
 
 class RaceResultsLoader:

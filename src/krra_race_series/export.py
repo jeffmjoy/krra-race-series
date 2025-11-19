@@ -2,7 +2,7 @@
 
 import csv
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 from .scoring import SeriesTotal
 
@@ -31,7 +31,7 @@ class ResultsExporter:
         return value
 
     def export_to_csv(
-        self, series_totals: List[SeriesTotal], output_path: Path
+        self, series_totals: list[SeriesTotal], output_path: Path
     ) -> None:
         """Export series totals to a CSV file.
 
@@ -60,7 +60,7 @@ class ResultsExporter:
                 )
 
     def export_detailed_csv(
-        self, series_totals: List[SeriesTotal], output_path: Path
+        self, series_totals: list[SeriesTotal], output_path: Path
     ) -> None:
         """Export detailed series results including individual race points.
 
