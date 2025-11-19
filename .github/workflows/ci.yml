@@ -48,7 +48,7 @@ jobs:
 
       - name: Run tests with pytest
         run: |
-          pytest --cov=krra_race_series --cov-report=term-missing --cov-report=xml
+          pytest --cov --cov-branch --cov-report=xml
 
       - name: Run Snyk security scan
         if: matrix.python-version == '3.13'
