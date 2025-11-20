@@ -27,42 +27,82 @@ jobs:
           pip install requests packaging
 
       - name: Check Python EOL status
+        id: eol-check
         run: python .github/scripts/check_python_eol.py
+        continue-on-error: true
 
-      - name: Create issue if versions need attention
-        if: failure()
+      - name: Create or update issue
+        if: always() && steps.eol-check.outcome != 'skipped'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const reportPath = 'python-version-report.txt';
 
-            if (fs.existsSync(reportPath)) {
-              const report = fs.readFileSync(reportPath, 'utf8');
+            if (!fs.existsSync(reportPath)) {
+              console.log('No report file found, skipping issue creation');
+              return;
+            }
 
-              // Check if an issue already exists
-              const issues = await github.rest.issues.listForRepo({
+            const report = fs.readFileSync(reportPath, 'utf8');
+            const exitCode = '${{ steps.eol-check.outcome }}';
+            const isCritical = exitCode === 'failure';
+
+            // Determine labels and title based on severity
+            const labels = isCritical
+              ? ['python-version-update', 'dependencies', 'priority-high']
+              : ['python-version-update', 'dependencies', 'advisory'];
+
+            const title = isCritical
+              ? '⚠️ Python Version Update Required'
+              : 'ℹ️ Python Version Update Available';
+
+            // Check if an issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'python-version-update'
+            });
+
+            if (issues.data.length === 0) {
+              // Create new issue
+              await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                state: 'open',
-                labels: 'python-version-update'
+                title: title,
+                body: report,
+                labels: labels
               });
+              console.log(`Created new issue: ${title}`);
+            } else {
+              // Update existing issue
+              const existingIssue = issues.data[0];
 
-              if (issues.data.length === 0) {
-                await github.rest.issues.create({
+              // Update title if severity changed
+              if (existingIssue.title !== title) {
+                await github.rest.issues.update({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  title: '⚠️ Python Version Update Required',
-                  body: report,
-                  labels: ['python-version-update', 'dependencies']
-                });
-              } else {
-                // Update existing issue
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issues.data[0].number,
-                  body: `## Updated Report (${new Date().toISOString().split('T')[0]})\n\n${report}`
+                  issue_number: existingIssue.number,
+                  title: title
                 });
               }
+
+              // Update labels if severity changed
+              await github.rest.issues.setLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                labels: labels
+              });
+
+              // Add comment with updated report
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `## Updated Report (${new Date().toISOString().split('T')[0]})\n\n${report}`
+              });
+              console.log(`Updated existing issue #${existingIssue.number}`);
             }

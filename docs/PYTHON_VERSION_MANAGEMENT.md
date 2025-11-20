@@ -35,11 +35,26 @@ The script provides recommendations in three scenarios:
 
 ### Automated Actions
 
-When issues are detected:
+When the monthly check runs or when triggered manually:
 
-- A detailed report is generated
-- A GitHub Issue is automatically created with label `python-version-update`
+- A detailed report is generated showing Python version status
+- A GitHub Issue is **always** created or updated (for both critical EOL warnings and advisory recommendations)
+- Issue labels indicate severity:
+  - **Critical** (EOL or approaching EOL): `python-version-update`, `dependencies`, `priority-high`
+  - **Advisory** (newer version available): `python-version-update`, `dependencies`, `advisory`
+- Issue title changes based on severity:
+  - **⚠️ Python Version Update Required** - Immediate action needed
+  - **ℹ️ Python Version Update Available** - Optional upgrade recommendation
 - Subsequent runs update the existing issue rather than creating duplicates
+- You can close the issue if you choose not to upgrade (e.g., for advisory recommendations)
+
+**How it works**:
+
+- The workflow checks for existing open issues with the `python-version-update` label
+- If an issue exists: Adds a timestamped comment with the latest report and updates title/labels if severity changed
+- If none exists: Creates a new issue with appropriate severity (critical or advisory)
+- Only one Python version issue will be open at a time
+- Closed issues will be recreated on the next run if the situation hasn't changed
 
 ## Manual Usage
 
