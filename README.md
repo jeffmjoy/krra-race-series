@@ -126,7 +126,7 @@ Or simply save files in VS Code (auto-format is enabled).
 The project includes automated monitoring of Python version EOL (End-of-Life) status:
 
 - **Automated checks** run monthly via GitHub Actions
-- **Alerts** when your minimum Python version is EOL or approaching EOL
+- **Alerts** when the minimum Python version is EOL or approaching EOL
 - **Recommendations** for upgrading to newer stable versions
 
 To manually check Python EOL status:

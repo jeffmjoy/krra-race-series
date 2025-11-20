@@ -18,7 +18,7 @@ The workflow runs:
 
 ### What It Checks
 
-1. **EOL Status**: Identifies if your minimum Python version is already EOL
+1. **EOL Status**: Identifies if the minimum Python version is already EOL
 2. **Approaching EOL**: Warns when supported versions will EOL within 6 months
 3. **Latest Stable**: Recommends the newest stable Python version
 4. **Action Items**: Provides a checklist of files to update
@@ -27,11 +27,11 @@ The workflow runs:
 
 The script provides recommendations in three scenarios:
 
-1. **Critical (Exits with error)**: When your minimum Python version is **already EOL** or will be within 6 months
-2. **Advisory (Informational)**: When a newer stable Python version is available, even if your current minimum is still supported
+1. **Critical (Exits with error)**: When the minimum Python version is **already EOL** or will be within 6 months
+2. **Advisory (Informational)**: When a newer stable Python version is available, even if the current minimum is still supported
 3. **Best Practice**: The script always shows the latest stable version so you can plan proactive upgrades
 
-**Example**: Your repo currently requires Python 3.10+ (EOL: October 2026). While Python 3.10 is still supported, the script recommends considering Python 3.14 (the latest stable) for better performance, security patches, and extended support until 2030.
+**Example**: The repo may require Python 3.10+ (EOL: October 2026). While Python 3.10 is still supported, the script recommends considering Python 3.14 (the latest stable) for better performance, security patches, and extended support until 2030.
 
 ### Automated Actions
 
@@ -71,11 +71,11 @@ python .github/scripts/check_python_eol.py
 The script will:
 
 - Fetch the latest Python EOL data from [endoflife.date](https://endoflife.date/python)
-- Parse your `pyproject.toml` for the minimum version
+- Parse `pyproject.toml` for the minimum version
 - Generate a report with recommendations
 - Exit with code 1 if action is needed, 0 if all versions are current
 
-**Note**: When run in GitHub Actions, the script generates `python-version-report.txt` in the repository root. This file is used by the workflow to create GitHub Issues but is **not** committed to git (it's temporary). When run locally, the file is created in your current directory for review.
+**Note**: When run in GitHub Actions, the script generates `python-version-report.txt` in the repository root. This file is used by the workflow to create GitHub Issues but is **not** committed to git (it's temporary). When run locally, the file is created in the current directory for review.
 
 ## Understanding the Report
 
@@ -93,14 +93,14 @@ The script will:
 # Python Version EOL Status Report
 
 **Report Date:** 2025-11-19
-**Project Requirement:** `>=3.10,<4.0`
-**Minimum Version:** Python 3.10
+**Project Requirement:** `>=3.9,<4.0`
+**Minimum Version:** Python 3.9
 
 ## ⚠️ End-of-Life Versions
 
-- **Python 3.10** (latest: 3.10.15)
-  - EOL Date: 2026-10-04
-  - Days past EOL: 30 days
+- **Python 3.10** (latest: 3.9.25)
+  - EOL Date: 2025-10-31
+  - Days past EOL: 19 days
 
 ## ✅ Latest Stable Version
 
@@ -192,7 +192,7 @@ These are included in the `dev` dependencies in `pyproject.toml`.
 
 The script uses the free [endoflife.date API](https://endoflife.date/docs/api/). If it's unreachable:
 
-- Check your internet connection
+- Check Internet connection
 - Verify the API is operational
 - Run manually to see detailed error messages
 
