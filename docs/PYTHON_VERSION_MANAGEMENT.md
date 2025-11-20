@@ -133,15 +133,18 @@ When you need to update the minimum Python version:
    ```toml
    classifiers = [
        "Programming Language :: Python :: 3.13",
+       "Programming Language :: Python :: 3.14",
    ]
    ```
 
-4. **Update CI/CD workflows** (if applicable):
+4. **Update CI/CD workflows**:
    - `.github/workflows/ci.yml` - Update the `python-version` matrix to test new versions
    - Example: Change `["3.10", "3.11", "3.12", "3.13"]` to `["3.13", "3.14"]` if dropping old versions
-   - If the project has a CI workflow that tests multiple Python versions, update the matrix to match the new `requires-python` setting in `pyproject.toml`.
 
-5. **Test with the new version**:
+5. **Update GitHub branch protection rules** (if applicable):
+   - See "Branch Protection Rules" section below
+
+6. **Test with the new version**:
 
    ```bash
    # Create new venv with Python 3.13
@@ -151,7 +154,18 @@ When you need to update the minimum Python version:
    pytest
    ```
 
-6. **Close the GitHub issue** created by the workflow
+7. **Close the GitHub issue** created by the workflow
+
+## Branch Protection Rules
+
+If you have branch protection rules that require specific CI checks to pass (e.g., `test (3.10)`, `test (3.11)`), removing a Python version from your CI matrix will cause issues:
+
+- The old check (e.g., `test (3.10)`) will never complete
+- Pull requests will be blocked waiting for a check that no longer exists
+
+**Solution:** Consider using a status check aggregate job (like `ci-complete`) that depends on all matrix jobs. This allows you to require only one check in branch protection rules, which remains stable regardless of Python version changes in the matrix.
+
+See the project's `.github/workflows/ci.yml` for an example implementation.
 
 ## Configuration
 
