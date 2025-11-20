@@ -211,33 +211,29 @@ def generate_report(results: dict[str, Any], pyproject_info: dict[str, Any]) -> 
 
         if results["eol_versions"]:
             lines.append(
-                "1. **Immediately update minimum Python version** - "
+                "- **Immediately update minimum Python version** - "
                 "Your current minimum version is EOL"
             )
             latest = results["latest_stable"]
             if latest:
+                lines.append(f"  - Update `requires-python` to `>={latest['version']}`")
                 lines.append(
-                    f"   - Update `requires-python` to `>={latest['version']}`"
-                )
-                lines.append(
-                    f"   - Update CI/CD workflows to test Python {latest['version']}"
+                    f"  - Update CI/CD workflows to test Python {latest['version']}"
                 )
 
         if results["approaching_eol"]:
             lines.append(
-                "2. **Plan migration** - "
+                "- **Plan migration** - "
                 "Prepare to update your minimum version before EOL"
             )
 
         if results["latest_stable"]:
             latest = results["latest_stable"]
-            lines.append(
-                f"3. **Consider upgrading to Python {latest['version']}** for:"
-            )
-            lines.append("   - Latest security patches")
-            lines.append("   - Performance improvements")
-            lines.append("   - New language features")
-            lines.append("   - Extended support timeline")
+            lines.append(f"- **Consider upgrading to Python {latest['version']}** for:")
+            lines.append("  - Latest security patches")
+            lines.append("  - Performance improvements")
+            lines.append("  - New language features")
+            lines.append("  - Extended support timeline")
 
         lines.append("")
         lines.append("## ⚠️ Branch Protection Consideration")
