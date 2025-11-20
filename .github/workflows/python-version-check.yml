@@ -1,0 +1,112 @@
+name: Python Version Check
+
+on:
+  schedule:
+    # Run monthly on the 1st at 9:00 UTC
+    - cron: '0 9 1 * *'
+  workflow_dispatch: # Allow manual triggers
+  pull_request:
+    paths:
+      - 'pyproject.toml'
+      - '.github/workflows/python-version-check.yml'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-python-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          pip install requests packaging
+
+      - name: Check Python EOL status
+        id: eol-check
+        run: python .github/scripts/check_python_eol.py
+        continue-on-error: true
+
+      - name: Create or update issue
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.eol-check.outcome != 'skipped'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'python-version-report.txt';
+
+            if (!fs.existsSync(reportPath)) {
+              console.log('No report file found, skipping issue creation');
+              return;
+            }
+
+            const report = fs.readFileSync(reportPath, 'utf8');
+            const exitCode = '${{ steps.eol-check.outcome }}';
+            const isCritical = exitCode === 'failure';
+
+            // Determine labels and title based on severity
+            const labels = isCritical
+              ? ['python-version-update', 'dependencies', 'priority-high']
+              : ['python-version-update', 'dependencies', 'advisory'];
+
+            const title = isCritical
+              ? '⚠️ Python Version Update Required'
+              : 'ℹ️ Python Version Update Available';
+
+            // Check if an issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'python-version-update'
+            });
+
+            if (issues.data.length === 0) {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: report,
+                labels: labels
+              });
+              console.log(`Created new issue: ${title}`);
+            } else {
+              // Update existing issue
+              const existingIssue = issues.data[0];
+
+              // Update title if severity changed
+              if (existingIssue.title !== title) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existingIssue.number,
+                  title: title
+                });
+              }
+
+              // Update labels if severity changed
+              await github.rest.issues.setLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                labels: labels
+              });
+
+              // Add comment with updated report
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `## Updated Report (${new Date().toISOString().split('T')[0]})\n\n${report}`
+              });
+              console.log(`Updated existing issue #${existingIssue.number}`);
+            }
