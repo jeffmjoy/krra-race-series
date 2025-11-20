@@ -43,7 +43,7 @@ def parse_pyproject_toml() -> dict[str, Any]:
         print(f"ERROR: pyproject.toml not found at {pyproject_path}")
         sys.exit(1)
 
-    content = pyproject_path.read_text()
+    content = pyproject_path.read_text(encoding="utf-8")
 
     # Simple parser for requires-python field
     requires_python = None
@@ -104,6 +104,9 @@ def check_eol_status(
         except ValueError:
             continue
 
+        # If the cycle does not contain a dot, assume it is a minor version of Python
+        # 3.x. This assumption is based on current API behavior. If Python 4.x cycles
+        # appear, update this logic to handle major version transitions explicitly.
         version_str = f"3.{cycle}" if "." not in cycle else cycle
 
         # Track latest stable (non-EOL) version
@@ -115,7 +118,7 @@ def check_eol_status(
                 "lts": lts,
             }
 
-        # Check if minimum version is EOL
+        # Check if versions in our supported range are EOL or approaching EOL
         try:
             if Version(version_str) >= Version(min_version):
                 if eol_date < today:
@@ -289,9 +292,8 @@ def main() -> None:
     print(report)
     print("=" * 70)
 
-    # Save report for GitHub Actions
     report_path = Path("python-version-report.txt")
-    report_path.write_text(report)
+    report_path.write_text(report, encoding="utf-8")
     print(f"\nReport saved to: {report_path}")
 
     # Exit with error if action needed
