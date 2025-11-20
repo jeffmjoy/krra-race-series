@@ -16,7 +16,7 @@ from typing import Any, cast
 
 try:
     import requests
-    from packaging.specifiers import SpecifierSet
+    from packaging.specifiers import InvalidSpecifier, SpecifierSet
     from packaging.version import Version
 except ImportError:
     print("ERROR: Required packages not installed. Run: pip install requests packaging")
@@ -70,7 +70,7 @@ def get_minimum_version(specifier_str: str) -> str | None:
         for s in spec:
             if s.operator in (">=", ">"):
                 return str(s.version)
-    except Exception as e:
+    except InvalidSpecifier as e:
         print(f"WARNING: Could not parse specifier '{specifier_str}': {e}")
     return None
 
@@ -110,7 +110,10 @@ def check_eol_status(
         version_str = f"3.{cycle}" if "." not in cycle else cycle
 
         # Track latest stable (non-EOL) version
-        if eol_date > today and (results["latest_stable"] is None):
+        if eol_date > today and (
+            results["latest_stable"] is None
+            or Version(version_str) > Version(results["latest_stable"]["version"])
+        ):
             results["latest_stable"] = {
                 "version": version_str,
                 "latest_patch": latest,
