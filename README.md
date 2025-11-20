@@ -1,5 +1,15 @@
 # KRRA Race Series Scoring System
 
+[![CI](https://github.com/jeffmjoy/krra-race-series/actions/workflows/ci.yml/badge.svg)](https://github.com/jeffmjoy/krra-race-series/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/jeffmjoy/krra-race-series/actions/workflows/codeql.yml/badge.svg)](https://github.com/jeffmjoy/krra-race-series/actions/workflows/codeql.yml)
+[![codecov](https://codecov.io/gh/jeffmjoy/krra-race-series/graph/badge.svg)](https://codecov.io/gh/jeffmjoy/krra-race-series)
+[![Known Vulnerabilities](https://snyk.io/test/github/jeffmjoy/krra-race-series/badge.svg)](https://snyk.io/test/github/jeffmjoy/krra-race-series)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+[![Type checked: mypy](https://img.shields.io/badge/type%20checked-mypy-blue.svg)](https://github.com/python/mypy)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+
 A proof-of-concept application for automating the Kingston Road Runners Association (KRRA) race series scoring.
 
 > [!NOTE]
