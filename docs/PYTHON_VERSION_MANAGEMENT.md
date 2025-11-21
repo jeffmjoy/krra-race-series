@@ -91,7 +91,6 @@ The script will:
 
 ```markdown
 # Python Version EOL Status Report
-# Python Version EOL Status Report
 
 **Report Date:** 2025-11-21
 **Project Requirement:** `>=3.10,<4.0`
