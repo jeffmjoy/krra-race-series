@@ -91,27 +91,58 @@ The script will:
 
 ```markdown
 # Python Version EOL Status Report
+# Python Version EOL Status Report
 
-**Report Date:** 2025-11-19
-**Project Requirement:** `>=3.9,<4.0`
-**Minimum Version:** Python 3.9
+**Report Date:** 2025-11-21
+**Project Requirement:** `>=3.10,<4.0`
+**Minimum Version:** Python 3.10
 
 ## ⚠️ End-of-Life Versions
 
-- **Python 3.10** (latest: 3.9.25)
-  - EOL Date: 2025-10-31
-  - Days past EOL: 19 days
+The following Python versions in your supported range are **already EOL**:
+
+(none)
+
+## ⏰ Approaching End-of-Life
+
+The following versions will reach EOL soon (within 6 months):
+
+- **Python 3.10** (latest: 3.10.13)
+   - EOL Date: 2026-10-06
+   - Days until EOL: **320 days**
 
 ## ✅ Latest Stable Version
 
-**Python 3.13** (latest patch: 3.13.1)
-- EOL Date: 2029-10-31
+**Python 3.14** (latest patch: 3.14.0)
+- EOL Date: 2030-10-06
 
 ## 📋 Recommendations
 
-1. **Immediately update minimum Python version**
-   - Update `requires-python` to `>=3.13`
-   - Update CI/CD workflows to test Python 3.13
+- **Plan migration** - Prepare to update your minimum version before EOL
+- **Consider upgrading to Python 3.14** for:
+   - Latest security patches
+   - Performance improvements
+   - New language features
+   - Extended support timeline
+
+## ⚠️ Branch Protection Consideration
+
+If you have branch protection rules that require specific CI checks (e.g., `test (3.10)`), you may need to update those rules when adding or removing Python versions from the CI matrix.
+
+See `docs/PYTHON_VERSION_MANAGEMENT.md` for guidance on managing branch protection rules.
+
+## 🔧 Action Items
+
+- [ ] Update `pyproject.toml` `requires-python` field
+- [ ] Update `pyproject.toml` classifiers
+- [ ] Update instruction files (`.github/copilot-instructions.md`, `agents.md`)
+- [ ] Update GitHub Actions workflows (`.github/workflows/*.yml`) Python version matrices
+- [ ] Update GitHub branch protection rules (if using specific CI checks)
+- [ ] Test with new Python version
+- [ ] Update documentation
+
+---
+*This report is generated automatically by `.github/workflows/python-version-check.yml`*
 ```
 
 ## Updating Python Version
@@ -125,6 +156,7 @@ When you need to update the minimum Python version:
    ```
 
 2. **Update instruction files**:
+
    - `.github/copilot-instructions.md`
    - `agents.md`
 
@@ -133,27 +165,47 @@ When you need to update the minimum Python version:
    ```toml
    classifiers = [
        "Programming Language :: Python :: 3.13",
+       "Programming Language :: Python :: 3.14",
    ]
    ```
 
 4. **Update CI/CD workflows**:
+
    - `.github/workflows/ci.yml` - Update the `python-version` matrix to test new versions
-   - Example: Change `["3.10", "3.11", "3.12", "3.13"]` to `["3.13"]` if dropping old versions
+   - Example: Change `["3.10", "3.11", "3.12", "3.13"]` to `["3.13", "3.14"]` if dropping older versions
 
 5. **Update GitHub branch protection rules** (if applicable):
-   - See "Branch Protection Rules" section below
 
-6. **Test with the new version**:
+   - See [Branch Protection Rules](#branch-protection-rules) section below
+
+6. **Check for the desired Python version**:
+
+   Before creating a new virtual environment, verify the required Python version is installed:
 
    ```bash
-   # Create new venv with Python 3.13
-   python3.13 -m venv .venv
+   python3.14 --version
+   ```
+
+   If you see "command not found" or a version lower than required, install Python 3.14 using your OS package manager, or download from python.org.
+
+7. **Remove the old virtual environment**:
+
+   ```bash
+   rm -rf .venv
+   ```
+
+   This ensures no old dependencies or interpreter paths remain. Do this before creating the new environment.
+
+8. **Create and test with the new version**:
+
+   ```bash
+   python3.14 -m venv .venv
    source .venv/bin/activate
    pip install -e ".[dev]"
    pytest
    ```
 
-7. **Close the GitHub issue** created by the workflow
+9. **Close the GitHub issue** created by the workflow
 
 ## Branch Protection Rules
 
