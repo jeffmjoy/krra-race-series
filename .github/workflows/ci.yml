@@ -33,19 +33,19 @@ jobs:
 
       - name: Run linting with Ruff
         run: |
-          ruff check src/ tests/
+          ruff check src/ tests/ .github/scripts/
 
       - name: Run formatting check with Ruff
         run: |
-          ruff format --check src/ tests/
+          ruff format --check src/ tests/ .github/scripts/
 
       - name: Run type checking with mypy
         run: |
-          mypy src/
+          mypy src/ .github/scripts/
 
       - name: Run security checks with Bandit
         run: |
-          bandit -c pyproject.toml -r src/
+          bandit -c pyproject.toml -r src/ .github/scripts/
 
       - name: Run dependency vulnerability scan with pip-audit
         run: |

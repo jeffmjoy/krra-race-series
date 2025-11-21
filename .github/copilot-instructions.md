@@ -65,6 +65,7 @@ source .venv/bin/activate
 ### Code Style
 
 - Follow Ruff linting rules (configured in `pyproject.toml`)
+- Apply to all Python code: `src/`, `tests/`, and `.github/scripts/`
 - Line length: 88 characters
 - Use double quotes for strings
 - Import order: standard library, third-party, local (handled by Ruff's isort)
@@ -116,8 +117,8 @@ Pre-commit hooks will automatically run, but you can manually check:
 source .venv/bin/activate
 
 # Then run checks (no need to re-activate for each command)
-ruff check --fix src/ tests/
-ruff format src/ tests/
-mypy src/  # Note: Configured for Python 3.9+ but checks 3.8-compatible code
+ruff check --fix src/ tests/ .github/scripts/
+ruff format src/ tests/ .github/scripts/
+mypy src/ .github/scripts/
 pytest
 ```

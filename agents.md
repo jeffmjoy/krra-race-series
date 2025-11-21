@@ -54,14 +54,14 @@ pytest --cov=krra_race_series --cov-report=term-missing
 ### Linting and Formatting
 
 ```bash
-ruff check --fix src/ tests/
-ruff format src/ tests/
+ruff check --fix src/ tests/ .github/scripts/
+ruff format src/ tests/ .github/scripts/
 ```
 
 ### Type Checking
 
 ```bash
-mypy src/
+mypy src/ .github/scripts/
 ```
 
 ### Running the CLI
