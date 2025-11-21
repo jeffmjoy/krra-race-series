@@ -56,8 +56,9 @@ def parse_pyproject_toml() -> dict[str, Any]:
                 break
 
     if not requires_python:
-        print("WARNING: Could not find requires-python in pyproject.toml")
-        requires_python = ">=3.10"  # Default from instructions
+        print("ERROR: Could not find requires-python in pyproject.toml")
+        print("Please ensure pyproject.toml contains a requires-python field")
+        sys.exit(1)
 
     return {"requires_python": requires_python, "path": str(pyproject_path)}
 
@@ -104,9 +105,10 @@ def check_eol_status(
         except ValueError:
             continue
 
-        # If the cycle does not contain a dot, assume it is a minor version of Python
-        # 3.x. This assumption is based on current API behavior. If Python 4.x cycles
-        # appear, update this logic to handle major version transitions explicitly.
+        # If the cycle does not contain a dot, assume it is a minor version
+        # (e.g., "10" -> "3.10"). This is based on current API behavior for
+        # Python 3.x. If Python 4.x cycles appear, update this logic for
+        # major version transitions.
         version_str = f"3.{cycle}" if "." not in cycle else cycle
 
         # Track latest stable (non-EOL) version
@@ -209,43 +211,59 @@ def generate_report(results: dict[str, Any], pyproject_info: dict[str, Any]) -> 
 
         if results["eol_versions"]:
             lines.append(
-                "1. **Immediately update minimum Python version** - "
+                "- **Immediately update minimum Python version** - "
                 "Your current minimum version is EOL"
             )
             latest = results["latest_stable"]
             if latest:
+                lines.append(f"  - Update `requires-python` to `>={latest['version']}`")
                 lines.append(
-                    f"   - Update `requires-python` to `>={latest['version']}`"
-                )
-                lines.append(
-                    f"   - Update CI/CD workflows to test Python {latest['version']}"
+                    f"  - Update CI/CD workflows to test Python {latest['version']}"
                 )
 
         if results["approaching_eol"]:
             lines.append(
-                "2. **Plan migration** - "
+                "- **Plan migration** - "
                 "Prepare to update your minimum version before EOL"
             )
 
         if results["latest_stable"]:
             latest = results["latest_stable"]
-            lines.append(
-                f"3. **Consider upgrading to Python {latest['version']}** for:"
-            )
-            lines.append("   - Latest security patches")
-            lines.append("   - Performance improvements")
-            lines.append("   - New language features")
-            lines.append("   - Extended support timeline")
+            lines.append(f"- **Consider upgrading to Python {latest['version']}** for:")
+            lines.append("  - Latest security patches")
+            lines.append("  - Performance improvements")
+            lines.append("  - New language features")
+            lines.append("  - Extended support timeline")
 
+        lines.append("")
+        lines.append("## ⚠️ Branch Protection Consideration")
+        lines.append("")
+        lines.append(
+            "If you have branch protection rules that require specific CI checks "
+            "(e.g., `test (3.10)`), you may need to update those rules when adding "
+            "or removing Python versions from the CI matrix."
+        )
+        lines.append("")
+        lines.append(
+            "See `docs/PYTHON_VERSION_MANAGEMENT.md` for guidance on managing "
+            "branch protection rules."
+        )
         lines.append("")
         lines.append("## 🔧 Action Items")
         lines.append("")
         lines.append("- [ ] Update `pyproject.toml` `requires-python` field")
+        lines.append("- [ ] Update `pyproject.toml` classifiers")
         lines.append(
-            "- [ ] Update `.github/copilot-instructions.md` Python version references"
+            "- [ ] Update instruction files (`.github/copilot-instructions.md`, "
+            "`agents.md`)"
         )
-        lines.append("- [ ] Update `agents.md` Python version references")
-        lines.append("- [ ] Update CI/CD workflows (if any)")
+        lines.append(
+            "- [ ] Update GitHub Actions workflows (`.github/workflows/*.yml`) "
+            "Python version matrices"
+        )
+        lines.append(
+            "- [ ] Update GitHub branch protection rules (if using specific CI checks)"
+        )
         lines.append("- [ ] Test with new Python version")
         lines.append("- [ ] Update documentation")
     else:
