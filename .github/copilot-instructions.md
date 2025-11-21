@@ -29,7 +29,7 @@ source .venv/bin/activate
 ## Python Version
 
 - **Required:** Python 3.10+
-- **Compatible:** Python 3.10, 3.11, 3.12, 3.13, 3.14
+- **Compatible:** Python 3.10, 3.11, 3.12, 3.13
 - Always write code compatible with Python 3.10 as the minimum version
 
 ## Code Standards
