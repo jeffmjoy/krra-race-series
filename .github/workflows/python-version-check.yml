@@ -91,14 +91,7 @@ jobs:
                 repo: context.repo.repo,
                 issue_number: existingIssue.number,
                 title: title,
-                body: updatedBody
-              });
-
-              // Update labels
-              await github.rest.issues.setLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: existingIssue.number,
+                body: updatedBody,
                 labels: labels
               });
 
