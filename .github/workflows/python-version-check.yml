@@ -58,8 +58,8 @@ jobs:
               : ['python-version-update', 'dependencies', 'advisory'];
 
             const title = isCritical
-              ? '⚠️ Python Version Update Required'
-              : 'ℹ️ Python Version Update Available';
+              ? '🔧 Python Version Update Required'
+              : '📢 Python Version Update Available';
 
             // Check if an issue already exists
             const issues = await github.rest.issues.listForRepo({
@@ -69,13 +69,15 @@ jobs:
               labels: 'python-version-update'
             });
 
+            const updatedBody = `${report}\n\n---\n*Last updated: ${new Date().toISOString().split('T')[0]}*`;
+
             if (issues.data.length === 0) {
               // Create new issue
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: title,
-                body: report,
+                body: updatedBody,
                 labels: labels
               });
               console.log(`Created new issue: ${title}`);
@@ -83,17 +85,16 @@ jobs:
               // Update existing issue
               const existingIssue = issues.data[0];
 
-              // Update title if severity changed
-              if (existingIssue.title !== title) {
-                await github.rest.issues.update({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: existingIssue.number,
-                  title: title
-                });
-              }
+              // Update title, body, and labels
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                title: title,
+                body: updatedBody
+              });
 
-              // Update labels if severity changed
+              // Update labels
               await github.rest.issues.setLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -101,12 +102,5 @@ jobs:
                 labels: labels
               });
 
-              // Add comment with updated report
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: existingIssue.number,
-                body: `## Updated Report (${new Date().toISOString().split('T')[0]})\n\n${report}`
-              });
               console.log(`Updated existing issue #${existingIssue.number}`);
             }
