@@ -9,7 +9,6 @@ This script:
 4. Recommends updates to newer stable versions
 """
 
-import contextlib
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -112,8 +111,14 @@ def check_eol_status(
         # Parse release date if available
         release_date = None
         if release_date_str:
-            with contextlib.suppress(ValueError):
+            try:
                 release_date = datetime.strptime(release_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                print(
+                    f"WARNING: Failed to parse release date "
+                    f"'{release_date_str}' for cycle '{cycle}'.",
+                    file=sys.stderr,
+                )
 
         # If the cycle does not contain a dot, assume it is a minor version
         # (e.g., "10" -> "3.10"). This is based on current API behavior for
