@@ -172,7 +172,7 @@ When you need to update the minimum Python version:
 4. **Update CI/CD workflows**:
 
    - `.github/workflows/ci.yml` - Update the `python-version` matrix to test new versions
-   - Example: Change `["3.10", "3.11", "3.12", "3.13"]` to `["3.13", "3.14"]` if dropping older versions
+   - Example: Change `["3.10", "3.11", "3.12", "3.13"]` to `["3.13", "3.14"]` if dropping old versions
 
 5. **Update GitHub branch protection rules** (if applicable):
 
@@ -241,6 +241,17 @@ Edit `.github/scripts/check_python_eol.py`:
 ```python
 warning_threshold = today + timedelta(days=180)  # Change 180 to desired days
 ```
+
+### Version Maturity Threshold
+
+The script only recommends Python versions that have been released for at least 90 days. This ensures:
+
+- Third-party packages have time to add support
+- Early bugs are discovered and patched
+- Tooling and IDEs catch up
+- Production stability is better established
+
+The script will still show newer versions in the report but won't create advisory issues until they pass the maturity threshold.
 
 ## Dependencies
 
