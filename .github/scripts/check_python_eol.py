@@ -82,12 +82,14 @@ def check_eol_status(
     """Check EOL status for Python versions."""
     today = datetime.now().date()
     warning_threshold = today + timedelta(days=180)  # 6 months warning
+    maturity_threshold = timedelta(days=90)  # Only recommend versions 90+ days old
 
     results: dict[str, Any] = {
         "min_version": min_version,
         "eol_versions": [],
         "approaching_eol": [],
         "latest_stable": None,
+        "latest_mature": None,
         "recommendations": [],
     }
 
@@ -96,6 +98,7 @@ def check_eol_status(
         eol_date_str = version_data.get("eol", "")
         latest = version_data.get("latest", "")
         lts = version_data.get("lts", False)
+        release_date_str = version_data.get("releaseDate", "")
 
         if not eol_date_str or eol_date_str == "false":
             continue
@@ -104,6 +107,18 @@ def check_eol_status(
             eol_date = datetime.strptime(eol_date_str, "%Y-%m-%d").date()
         except ValueError:
             continue
+
+        # Parse release date if available
+        release_date = None
+        if release_date_str:
+            try:
+                release_date = datetime.strptime(release_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                print(
+                    f"WARNING: Failed to parse release date "
+                    f"'{release_date_str}' for cycle '{cycle}'.",
+                    file=sys.stderr,
+                )
 
         # If the cycle does not contain a dot, assume it is a minor version
         # (e.g., "10" -> "3.10"). This is based on current API behavior for
@@ -121,7 +136,29 @@ def check_eol_status(
                 "latest_patch": latest,
                 "eol_date": eol_date_str,
                 "lts": lts,
+                "release_date": release_date_str,
             }
+
+        # Track latest mature version (released 90+ days ago)
+        if release_date is not None:
+            is_mature = (today - release_date) >= maturity_threshold
+            if (
+                eol_date > today
+                and is_mature
+                and (
+                    results["latest_mature"] is None
+                    or Version(version_str)
+                    > Version(results["latest_mature"]["version"])
+                )
+            ):
+                results["latest_mature"] = {
+                    "version": version_str,
+                    "latest_patch": latest,
+                    "eol_date": eol_date_str,
+                    "lts": lts,
+                    "release_date": release_date_str,
+                    "days_since_release": (today - release_date).days,
+                }
 
         # Check if versions in our supported range are EOL or approaching EOL
         try:
@@ -191,21 +228,59 @@ def generate_report(results: dict[str, Any], pyproject_info: dict[str, Any]) -> 
             lines.append(f"  - Days until EOL: **{v['days_until_eol']} days**")
         lines.append("")
 
-    # Latest stable recommendation
-    if results["latest_stable"]:
-        latest = results["latest_stable"]
+    # Latest stable recommendation (prioritize mature versions)
+    recommended_version = results.get("latest_mature") or results.get("latest_stable")
+    if recommended_version:
         lines.append("## ✅ Latest Stable Version")
         lines.append("")
         lines.append(
-            f"**Python {latest['version']}** (latest patch: {latest['latest_patch']})"
+            f"**Python {recommended_version['version']}** "
+            f"(latest patch: {recommended_version['latest_patch']})"
         )
-        lines.append(f"- EOL Date: {latest['eol_date']}")
-        if latest["lts"]:
+        lines.append(f"- EOL Date: {recommended_version['eol_date']}")
+        if recommended_version.get("lts"):
             lines.append("- **LTS** (Long Term Support)")
+        if "days_since_release" in recommended_version:
+            days = recommended_version["days_since_release"]
+            lines.append(f"- Released {days} days ago (mature version)")
         lines.append("")
 
+        # Note if a newer version exists but is too new
+        if (
+            results["latest_stable"]
+            and (
+                not results.get("latest_mature")
+                or Version(results["latest_stable"]["version"])
+                > Version(results["latest_mature"]["version"])
+            )
+            and Version(results["latest_stable"]["version"])
+            > Version(results["min_version"])
+        ):
+            latest = results["latest_stable"]
+            lines.append(
+                "ℹ️ **Note**: A newer version is available but not yet recommended:"
+            )
+            lines.append("")
+            lines.append(
+                f"- **Python {latest['version']}** "
+                f"(latest patch: {latest['latest_patch']})"
+            )
+            if latest.get("release_date"):
+                try:
+                    release = datetime.strptime(
+                        latest["release_date"], "%Y-%m-%d"
+                    ).date()
+                    days_old = (datetime.now().date() - release).days
+                    lines.append(
+                        f"  - Released {days_old} days ago "
+                        "(waiting for 90-day maturity period)"
+                    )
+                except ValueError:
+                    lines.append("  - Release date could not be parsed; skipping maturity info.")
+            lines.append("")
+
     # Recommendations
-    if has_issues or results["latest_stable"]:
+    if has_issues or recommended_version:
         lines.append("## 📋 Recommendations")
         lines.append("")
 
@@ -214,12 +289,10 @@ def generate_report(results: dict[str, Any], pyproject_info: dict[str, Any]) -> 
                 "- **Immediately update minimum Python version** - "
                 "Your current minimum version is EOL"
             )
-            latest = results["latest_stable"]
-            if latest:
-                lines.append(f"  - Update `requires-python` to `>={latest['version']}`")
-                lines.append(
-                    f"  - Update CI/CD workflows to test Python {latest['version']}"
-                )
+            if recommended_version:
+                rec_ver = recommended_version["version"]
+                lines.append(f"  - Update `requires-python` to `>={rec_ver}`")
+                lines.append(f"  - Update CI/CD workflows to test Python {rec_ver}")
 
         if results["approaching_eol"]:
             lines.append(
@@ -227,9 +300,11 @@ def generate_report(results: dict[str, Any], pyproject_info: dict[str, Any]) -> 
                 "Prepare to update your minimum version before EOL"
             )
 
-        if results["latest_stable"]:
-            latest = results["latest_stable"]
-            lines.append(f"- **Consider upgrading to Python {latest['version']}** for:")
+        if recommended_version and Version(recommended_version["version"]) > Version(
+            results["min_version"]
+        ):
+            rec_ver = recommended_version["version"]
+            lines.append(f"- **Consider upgrading to Python {rec_ver}** for:")
             lines.append("  - Latest security patches")
             lines.append("  - Performance improvements")
             lines.append("  - New language features")
