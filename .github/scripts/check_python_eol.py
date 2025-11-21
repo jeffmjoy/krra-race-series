@@ -246,7 +246,16 @@ def generate_report(results: dict[str, Any], pyproject_info: dict[str, Any]) -> 
         lines.append("")
 
         # Note if a newer version exists but is too new
-        if results["latest_stable"] and not results.get("latest_mature"):
+        if (
+            results["latest_stable"]
+            and (
+                not results.get("latest_mature")
+                or Version(results["latest_stable"]["version"])
+                > Version(results["latest_mature"]["version"])
+            )
+            and Version(results["latest_stable"]["version"])
+            > Version(results["min_version"])
+        ):
             latest = results["latest_stable"]
             lines.append(
                 "ℹ️ **Note**: A newer version is available but not yet recommended:"
