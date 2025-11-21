@@ -276,7 +276,7 @@ def generate_report(results: dict[str, Any], pyproject_info: dict[str, Any]) -> 
                         "(waiting for 90-day maturity period)"
                     )
                 except ValueError:
-                    pass
+                    lines.append("  - Release date could not be parsed; skipping maturity info.")
             lines.append("")
 
     # Recommendations
