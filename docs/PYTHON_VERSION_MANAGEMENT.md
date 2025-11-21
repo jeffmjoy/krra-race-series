@@ -31,7 +31,7 @@ The script provides recommendations in three scenarios:
 2. **Advisory (Informational)**: When a newer stable Python version is available, even if the current minimum is still supported
 3. **Best Practice**: The script always shows the latest stable version so you can plan proactive upgrades
 
-**Example**: The repo may require Python 3.10+ (EOL: October 2026). While Python 3.10 is still supported, the script recommends considering Python 3.14 (the latest stable) for better performance, security patches, and extended support until 2030.
+**Example**: The repo may require Python 3.10+ (EOL: October 2026). While Python 3.10 is still supported, the script recommends considering Python 3.13 (the latest stable) for better performance, security patches, and extended support until 2029.
 
 ### Automated Actions
 
@@ -133,13 +133,12 @@ When you need to update the minimum Python version:
    ```toml
    classifiers = [
        "Programming Language :: Python :: 3.13",
-       "Programming Language :: Python :: 3.14",
    ]
    ```
 
 4. **Update CI/CD workflows**:
    - `.github/workflows/ci.yml` - Update the `python-version` matrix to test new versions
-   - Example: Change `["3.10", "3.11", "3.12", "3.13"]` to `["3.13", "3.14"]` if dropping old versions
+   - Example: Change `["3.10", "3.11", "3.12", "3.13"]` to `["3.13"]` if dropping old versions
 
 5. **Update GitHub branch protection rules** (if applicable):
    - See "Branch Protection Rules" section below
