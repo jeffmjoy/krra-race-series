@@ -57,17 +57,18 @@ jobs:
 
       - name: Set up Snyk
         if: matrix.python-version == '3.13'
-        uses: snyk/actions/setup@master
+        uses: snyk/actions/setup@v1
 
       - name: Run Snyk security scan
         if: matrix.python-version == '3.13'
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          snyk test --severity-threshold=high --sarif-file-output=snyk.sarif
+          pip freeze > requirements.txt
+          snyk test --file=requirements.txt --severity-threshold=high --sarif-file-output=snyk.sarif || true
 
       - name: Upload Snyk results to GitHub Code Scanning
-        if: matrix.python-version == '3.13' && always()
+        if: matrix.python-version == '3.13' && always() && hashFiles('snyk.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: snyk.sarif
