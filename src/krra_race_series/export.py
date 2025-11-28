@@ -129,3 +129,37 @@ class ResultsExporter:
                             total.total_points,
                         ]
                     )
+
+    def export_category_standings(
+        self, category_standings: dict[str, list[SeriesTotal]], output_dir: Path
+    ) -> None:
+        """Export category-specific standings to separate CSV files.
+
+        Creates one CSV file per category (e.g., M_overall.csv, F_30-39.csv).
+
+        Args:
+            category_standings: Dictionary mapping category names to series totals
+            output_dir: Directory where category CSV files will be written
+        """
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        for category_name, totals in category_standings.items():
+            output_path = output_dir / f"{category_name}.csv"
+
+            with open(output_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
+
+                # Write header
+                writer.writerow(["Rank", "Member ID", "Name", "Races", "Total Points"])
+
+                # Write data
+                for rank, total in enumerate(totals, start=1):
+                    writer.writerow(
+                        [
+                            rank,
+                            self._sanitize_csv_field(total.member_id),
+                            self._sanitize_csv_field(total.member_name),
+                            total.races_completed,
+                            total.total_points,
+                        ]
+                    )

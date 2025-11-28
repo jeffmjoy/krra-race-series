@@ -273,3 +273,199 @@ def test_export_detailed_csv_creates_parent_directory(tmp_path):
     exporter.export_detailed_csv(totals, output_path)
 
     assert output_path.exists()
+
+
+def test_export_category_standings(tmp_path):
+    """Test exporting category standings to separate files."""
+    exporter = ResultsExporter()
+
+    category_standings = {
+        "M_overall": [
+            SeriesTotal(
+                member_id="M001",
+                member_name="John Doe",
+                races_completed=3,
+                total_points=225,
+                race_details=[],
+            ),
+            SeriesTotal(
+                member_id="M003",
+                member_name="Bob Jones",
+                races_completed=2,
+                total_points=150,
+                race_details=[],
+            ),
+        ],
+        "F_overall": [
+            SeriesTotal(
+                member_id="M002",
+                member_name="Jane Smith",
+                races_completed=2,
+                total_points=180,
+                race_details=[],
+            ),
+        ],
+        "M_30-39": [
+            SeriesTotal(
+                member_id="M001",
+                member_name="John Doe",
+                races_completed=3,
+                total_points=45,
+                race_details=[],
+            ),
+        ],
+    }
+
+    output_dir = tmp_path / "category_results"
+    exporter.export_category_standings(category_standings, output_dir)
+
+    # Check that all category files were created
+    assert (output_dir / "M_overall.csv").exists()
+    assert (output_dir / "F_overall.csv").exists()
+    assert (output_dir / "M_30-39.csv").exists()
+
+    # Verify M_overall content
+    with open(output_dir / "M_overall.csv") as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+        assert rows[0] == ["Rank", "Member ID", "Name", "Races", "Total Points"]
+        assert rows[1] == ["1", "M001", "John Doe", "3", "225"]
+        assert rows[2] == ["2", "M003", "Bob Jones", "2", "150"]
+
+    # Verify F_overall content
+    with open(output_dir / "F_overall.csv") as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+        assert rows[1] == ["1", "M002", "Jane Smith", "2", "180"]
+
+    # Verify M_30-39 content
+    with open(output_dir / "M_30-39.csv") as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+        assert rows[1] == ["1", "M001", "John Doe", "3", "45"]
+
+
+def test_export_category_standings_creates_directory(tmp_path):
+    """Test that category export creates output directory if it doesn't exist."""
+    exporter = ResultsExporter()
+
+    category_standings = {
+        "M_overall": [
+            SeriesTotal(
+                member_id="M001",
+                member_name="John Doe",
+                races_completed=1,
+                total_points=100,
+                race_details=[],
+            ),
+        ],
+    }
+
+    output_dir = tmp_path / "nested" / "category" / "results"
+    exporter.export_category_standings(category_standings, output_dir)
+
+    assert output_dir.exists()
+    assert (output_dir / "M_overall.csv").exists()
+
+
+def test_export_category_standings_with_formula_injection(tmp_path):
+    """Test that category export sanitizes malicious data."""
+    exporter = ResultsExporter()
+
+    category_standings = {
+        "M_overall": [
+            SeriesTotal(
+                member_id="=FORMULA()",
+                member_name="+1+1",
+                races_completed=1,
+                total_points=100,
+                race_details=[],
+            ),
+        ],
+    }
+
+    output_dir = tmp_path / "results"
+    exporter.export_category_standings(category_standings, output_dir)
+
+    with open(output_dir / "M_overall.csv") as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+        assert rows[1][1] == "'=FORMULA()"
+        assert rows[1][2] == "'+1+1"
+
+
+def test_export_category_standings_empty_category(tmp_path):
+    """Test exporting category with no members."""
+    exporter = ResultsExporter()
+
+    category_standings = {
+        "M_overall": [],
+    }
+
+    output_dir = tmp_path / "results"
+    exporter.export_category_standings(category_standings, output_dir)
+
+    # File should be created with just header
+    with open(output_dir / "M_overall.csv") as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+        assert len(rows) == 1  # Only header
+        assert rows[0] == ["Rank", "Member ID", "Name", "Races", "Total Points"]
+
+
+def test_export_category_standings_all_age_groups(tmp_path):
+    """Test exporting all possible age/gender category combinations."""
+    exporter = ResultsExporter()
+
+    # Create standings for all standard categories
+    category_standings = {}
+    for gender in ["M", "F"]:
+        for age_group in [
+            "overall",
+            "U20",
+            "20-29",
+            "30-39",
+            "40-49",
+            "50-59",
+            "60-69",
+            "70-79",
+            "80+",
+        ]:
+            category_name = f"{gender}_{age_group}"
+            category_standings[category_name] = [
+                SeriesTotal(
+                    member_id=f"{gender}001",
+                    member_name=f"Test {gender} {age_group}",
+                    races_completed=1,
+                    total_points=50,
+                    race_details=[],
+                ),
+            ]
+
+    output_dir = tmp_path / "all_categories"
+    exporter.export_category_standings(category_standings, output_dir)
+
+    # Verify all 18 category files exist (9 age groups x 2 genders)
+    expected_files = [
+        "M_overall.csv",
+        "F_overall.csv",
+        "M_U20.csv",
+        "F_U20.csv",
+        "M_20-29.csv",
+        "F_20-29.csv",
+        "M_30-39.csv",
+        "F_30-39.csv",
+        "M_40-49.csv",
+        "F_40-49.csv",
+        "M_50-59.csv",
+        "F_50-59.csv",
+        "M_60-69.csv",
+        "F_60-69.csv",
+        "M_70-79.csv",
+        "F_70-79.csv",
+        "M_80+.csv",
+        "F_80+.csv",
+    ]
+
+    for filename in expected_files:
+        assert (output_dir / filename).exists(), f"Missing file: {filename}"
