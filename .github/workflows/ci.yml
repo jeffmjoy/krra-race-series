@@ -57,6 +57,7 @@ jobs:
 
       - name: Run Snyk security scan
         if: matrix.python-version == '3.13' && github.actor != 'dependabot[bot]'
+        uses: snyk/actions/python@v1
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
