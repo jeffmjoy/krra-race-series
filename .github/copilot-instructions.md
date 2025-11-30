@@ -90,7 +90,8 @@ source .venv/bin/activate
 
 ## Security
 
-- **Always run Snyk scans on newly created code** (see `.github/instructions/snyk_rules.instructions.md`)
+- **Snyk scanning is handled automatically via the Snyk GitHub App** for repository-level security monitoring
+- **Always run Snyk scans on newly created code during development** using the Snyk MCP tools (see `.github/instructions/snyk_rules.instructions.md`)
 - Avoid hardcoding sensitive data (credentials, API keys, PII)
 - Be mindful of member data privacy (names, emails, ages)
 

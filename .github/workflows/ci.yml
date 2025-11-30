@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 jobs:
   test:
@@ -78,44 +77,3 @@ jobs:
             exit 1
           fi
           echo "✅ All CI checks passed successfully"
-
-  # Snyk security scanning - blocks PRs with high-severity issues
-  snyk:
-    name: Snyk Security Scan
-    runs-on: ubuntu-latest
-
-    steps:
-      # For Dependabot PRs, skip the scan and pass the check
-      - name: Skip Snyk for Dependabot
-        if: github.actor == 'dependabot[bot]'
-        run: |
-          echo "⏭️ Skipping Snyk scan for Dependabot PR"
-          exit 0
-
-      - uses: actions/checkout@v5
-
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-
-
-      - name: Run Snyk security scan
-        uses: snyk/actions/python@v1
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --sarif-file-output=snyk.sarif
-
-
-      - name: Upload Snyk results to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: snyk.sarif
