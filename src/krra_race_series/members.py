@@ -75,4 +75,5 @@ class MemberRegistry:
 
     def get_all_members(self) -> list[Member]:
         """Return all members in the registry."""
+        # Dummy comment
         return self.members.copy()
