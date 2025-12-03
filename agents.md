@@ -95,19 +95,19 @@ To manually run all hooks:
 pre-commit run --all-files
 ```
 
-## Security Scanning (Optional)
+## Security Scanning
 
-If you have Snyk installed, run security scans after generating or modifying code:
+### Repository-level Scanning
 
-```bash
-# Code scan for security issues in first-party code
-snyk code test
+Snyk automatically scans the repository via the Snyk GitHub App on PRs and pushes.
 
-# Dependency scan for vulnerabilities in third-party packages
-snyk test
-```
+### Local Development Scanning (Recommended)
 
-Fix any issues found and rescan until no new issues are detected.
+During development, use Snyk MCP tools to scan newly created or modified code:
+
+- The Snyk MCP integration provides `snyk_code_scan` and `snyk_sca_scan` tools
+- These are automatically invoked per the instructions in `.github/instructions/snyk_rules.instructions.md`
+- Fix any issues found and rescan until no new issues are detected
 
 ## Project Structure Quick Reference
 
