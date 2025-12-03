@@ -37,7 +37,7 @@ jobs:
 
       - name: Create or update issue
         if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.eol-check.outcome != 'skipped'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
