@@ -22,6 +22,7 @@ This project automates the process of:
 - Loading KRRA member lists
 - Matching race finishers with members
 - Applying a points system based on finishing position
+- Calculating age-graded performance percentages
 - Generating cumulative series totals
 - Exporting results to CSV
 
@@ -30,6 +31,7 @@ This project automates the process of:
 - 📊 CSV-based race result ingestion
 - 🔗 Automated finisher-to-member matching
 - 🏆 Points-based scoring system
+- 🎯 Age-graded performance rankings (WMA 2020 factors)
 - 📈 Series totals and standings
 - 💾 CSV export with summary and detailed formats
 - 🖥️ Command-line interface
@@ -67,17 +69,34 @@ Run the CLI to process race results:
 python -m krra_race_series.cli \
   --members data/members/members.csv \
   --races data/race_results/race1.csv data/race_results/race2.csv \
-  --output data/output/series_results.csv
+  --output data/output
 ```
 
-For detailed results with individual race breakdowns:
+This generates category standings files (e.g., `M_overall.csv`, `F_30-39.csv`) and an `age_graded.csv` file with combined gender rankings based on age-graded performance.
+
+#### Age-Graded Rankings
+
+The age-graded rankings use World Masters Athletics (WMA) 2020 age-grading factors to compare performances across ages and genders. This allows fair comparison of a 25-year-old woman, a 45-year-old man, and a 70-year-old runner on equal footing.
+
+To generate only specific categories:
 
 ```bash
 python -m krra_race_series.cli \
   --members data/members/members.csv \
   --races data/race_results/*.csv \
-  --output data/output/detailed_results.csv \
-  --detailed
+  --output data/output \
+  --categories "M_overall,F_overall,age_graded"
+```
+
+To use a different year of age-grading factors:
+
+```bash
+python -m krra_race_series.cli \
+  --members data/members/members.csv \
+  --races data/race_results/*.csv \
+  --output data/output \
+  --age-grading-year 2020
+```
 ```
 
 ## Data Formats
