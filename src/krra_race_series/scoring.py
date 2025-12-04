@@ -240,6 +240,7 @@ class SeriesTotal:
     races_completed: int
     total_points: int
     race_details: list[RacePoints]
+    race_points_by_race: dict[str, int] | None = None
 
 
 class SeriesScoring:
@@ -247,6 +248,7 @@ class SeriesScoring:
 
     def __init__(self) -> None:
         self.all_race_points: list[RacePoints] = []
+        self.race_names: list[str] = []
 
     def add_race_points(self, race_points: list[RacePoints]) -> None:
         """Add points from a race to the series.
@@ -255,6 +257,19 @@ class SeriesScoring:
             race_points: Points earned in a race
         """
         self.all_race_points.extend(race_points)
+        # Track race name if we have any points for it
+        if race_points:
+            race_name = race_points[0].race_name
+            if race_name not in self.race_names:
+                self.race_names.append(race_name)
+
+    def get_race_names(self) -> list[str]:
+        """Get the list of all race names in the series.
+
+        Returns:
+            List of race names in the order they were added
+        """
+        return self.race_names.copy()
 
     def calculate_series_totals(
         self, member_registry: MemberRegistry, max_races: int = 7
@@ -295,12 +310,18 @@ class SeriesScoring:
             )
             counted_races = sorted_points[:max_races]
 
+            # Build race points by race name (using total_points)
+            race_points_by_race = {
+                rp.race_name: rp.total_points for rp in counted_races
+            }
+
             total = SeriesTotal(
                 member_id=member_id,
                 member_name=member_name,
                 races_completed=len(counted_races),
                 total_points=sum(p.total_points for p in counted_races),
                 race_details=counted_races,
+                race_points_by_race=race_points_by_race,
             )
             totals.append(total)
 
@@ -360,6 +381,11 @@ class SeriesScoring:
             )
             counted_overall = sorted_overall[:max_races]
 
+            # Build race points by race name (using overall_points for overall)
+            overall_race_points = {
+                rp.race_name: rp.overall_points for rp in counted_overall
+            }
+
             if overall_category not in category_standings:
                 category_standings[overall_category] = []
 
@@ -370,6 +396,7 @@ class SeriesScoring:
                     races_completed=len(counted_overall),
                     total_points=sum(p.overall_points for p in counted_overall),
                     race_details=counted_overall,
+                    race_points_by_race=overall_race_points,
                 )
             )
 
@@ -381,6 +408,11 @@ class SeriesScoring:
                 )
                 counted_age_group = sorted_age_group[:max_races]
 
+                # Build race points by race name (using age_group_points)
+                age_group_race_points = {
+                    rp.race_name: rp.age_group_points for rp in counted_age_group
+                }
+
                 if age_category not in category_standings:
                     category_standings[age_category] = []
 
@@ -391,6 +423,7 @@ class SeriesScoring:
                         races_completed=len(counted_age_group),
                         total_points=sum(p.age_group_points for p in counted_age_group),
                         race_details=counted_age_group,
+                        race_points_by_race=age_group_race_points,
                     )
                 )
 

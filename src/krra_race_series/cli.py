@@ -91,7 +91,8 @@ def main() -> None:
 
     # Export category results
     print(f"\nExporting category standings to {args.output}/...")
-    exporter.export_category_standings(category_standings, args.output)
+    race_names = series.get_race_names()
+    exporter.export_category_standings(category_standings, args.output, race_names)
 
     # Display summary for each category
     print("\nCategory Standings Summary:")

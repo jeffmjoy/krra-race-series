@@ -31,13 +31,19 @@ class ResultsExporter:
         return value
 
     def export_to_csv(
-        self, series_totals: list[SeriesTotal], output_path: Path
+        self,
+        series_totals: list[SeriesTotal],
+        output_path: Path,
+        race_names: list[str] | None = None,
     ) -> None:
         """Export series totals to a CSV file.
 
         Args:
             series_totals: List of series totals to export
             output_path: Path where the CSV file will be written
+            race_names: Optional list of race names for individual columns.
+                        If provided, creates columns for each race instead of
+                        a single "Races" column.
         """
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -45,19 +51,37 @@ class ResultsExporter:
             writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
 
             # Write header
-            writer.writerow(["Rank", "Member ID", "Name", "Races", "Total Points"])
+            if race_names:
+                header = ["Rank", "Member ID", "Name"] + race_names + ["Total Points"]
+            else:
+                header = ["Rank", "Member ID", "Name", "Races", "Total Points"]
+            writer.writerow(header)
 
             # Write data
             for rank, total in enumerate(series_totals, start=1):
-                writer.writerow(
-                    [
-                        rank,
-                        self._sanitize_csv_field(total.member_id),
-                        self._sanitize_csv_field(total.member_name),
-                        total.races_completed,
-                        total.total_points,
+                if race_names and total.race_points_by_race is not None:
+                    race_columns = [
+                        total.race_points_by_race.get(race, "") for race in race_names
                     ]
-                )
+                    writer.writerow(
+                        [
+                            rank,
+                            self._sanitize_csv_field(total.member_id),
+                            self._sanitize_csv_field(total.member_name),
+                        ]
+                        + race_columns
+                        + [total.total_points]
+                    )
+                else:
+                    writer.writerow(
+                        [
+                            rank,
+                            self._sanitize_csv_field(total.member_id),
+                            self._sanitize_csv_field(total.member_name),
+                            total.races_completed,
+                            total.total_points,
+                        ]
+                    )
 
     def export_detailed_csv(
         self, series_totals: list[SeriesTotal], output_path: Path
@@ -131,7 +155,10 @@ class ResultsExporter:
                     )
 
     def export_category_standings(
-        self, category_standings: dict[str, list[SeriesTotal]], output_dir: Path
+        self,
+        category_standings: dict[str, list[SeriesTotal]],
+        output_dir: Path,
+        race_names: list[str] | None = None,
     ) -> None:
         """Export category-specific standings to separate CSV files.
 
@@ -140,6 +167,9 @@ class ResultsExporter:
         Args:
             category_standings: Dictionary mapping category names to series totals
             output_dir: Directory where category CSV files will be written
+            race_names: Optional list of race names for individual columns.
+                        If provided, creates columns for each race instead of
+                        a single "Races" column.
         """
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -150,16 +180,37 @@ class ResultsExporter:
                 writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
 
                 # Write header
-                writer.writerow(["Rank", "Member ID", "Name", "Races", "Total Points"])
+                if race_names:
+                    header = (
+                        ["Rank", "Member ID", "Name"] + race_names + ["Total Points"]
+                    )
+                else:
+                    header = ["Rank", "Member ID", "Name", "Races", "Total Points"]
+                writer.writerow(header)
 
                 # Write data
                 for rank, total in enumerate(totals, start=1):
-                    writer.writerow(
-                        [
-                            rank,
-                            self._sanitize_csv_field(total.member_id),
-                            self._sanitize_csv_field(total.member_name),
-                            total.races_completed,
-                            total.total_points,
+                    if race_names and total.race_points_by_race is not None:
+                        race_columns = [
+                            total.race_points_by_race.get(race, "")
+                            for race in race_names
                         ]
-                    )
+                        writer.writerow(
+                            [
+                                rank,
+                                self._sanitize_csv_field(total.member_id),
+                                self._sanitize_csv_field(total.member_name),
+                            ]
+                            + race_columns
+                            + [total.total_points]
+                        )
+                    else:
+                        writer.writerow(
+                            [
+                                rank,
+                                self._sanitize_csv_field(total.member_id),
+                                self._sanitize_csv_field(total.member_name),
+                                total.races_completed,
+                                total.total_points,
+                            ]
+                        )
