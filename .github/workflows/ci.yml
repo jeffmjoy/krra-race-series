@@ -54,12 +54,11 @@ jobs:
         run: |
           pytest --cov --cov-branch --cov-report=xml
 
-      - name: Upload coverage to Codecov (optional)
+      - name: Upload coverage to Codecov
         if: matrix.python-version == '3.13'
         uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
 
   # Aggregate status check for branch protection
   # This job always runs and provides a single check to require in branch protection rules
