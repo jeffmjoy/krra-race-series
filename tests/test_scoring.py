@@ -315,3 +315,280 @@ def test_calculate_race_points_with_matched_but_no_member():
     # Should only have points for match with actual member
     assert len(race_points) == 1
     assert race_points[0].member_id == "M001"
+
+
+def test_calculate_category_standings_overall():
+    """Test category standings for overall categories using overall points only."""
+    registry = MemberRegistry()
+    member1 = Member(
+        member_id="M001", first_name="John", last_name="Doe", age=35, gender="M"
+    )
+    member2 = Member(
+        member_id="M002", first_name="Jane", last_name="Smith", age=28, gender="F"
+    )
+    member3 = Member(
+        member_id="M003", first_name="Bob", last_name="Jones", age=42, gender="M"
+    )
+    registry.members = [member1, member2, member3]
+
+    series = SeriesScoring()
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    # Race 1: John 1st (75 overall, 15 age), Jane 2nd (73, 15), Bob 3rd (71, 15)
+    match1 = MatchResult(
+        race_result=RaceResult(place=1, name="John Doe", time="18:30"),
+        member=member1,
+        matched=True,
+    )
+    match2 = MatchResult(
+        race_result=RaceResult(place=2, name="Jane Smith", time="19:00"),
+        member=member2,
+        matched=True,
+    )
+    match3 = MatchResult(
+        race_result=RaceResult(place=3, name="Bob Jones", time="19:30"),
+        member=member3,
+        matched=True,
+    )
+    race_points = calculator.calculate_race_points([match1, match2, match3], "Race 1")
+    series.add_race_points(race_points)
+
+    category_standings = series.calculate_category_standings(registry)
+
+    # Check that overall categories exist
+    assert "M_overall" in category_standings
+    assert "F_overall" in category_standings
+
+    # M_overall should have John (75) and Bob (71)
+    m_overall = category_standings["M_overall"]
+    assert len(m_overall) == 2
+    assert m_overall[0].member_id == "M001"
+    assert m_overall[0].total_points == 75  # Only overall points
+    assert m_overall[1].member_id == "M003"
+    assert m_overall[1].total_points == 71
+
+    # F_overall should have Jane (73)
+    f_overall = category_standings["F_overall"]
+    assert len(f_overall) == 1
+    assert f_overall[0].member_id == "M002"
+    assert f_overall[0].total_points == 73  # Only overall points
+
+
+def test_calculate_category_standings_age_groups():
+    """Test category standings for age groups using age group points only."""
+    registry = MemberRegistry()
+    member1 = Member(
+        member_id="M001", first_name="John", last_name="Doe", age=35, gender="M"
+    )
+    member2 = Member(
+        member_id="M002", first_name="Jane", last_name="Smith", age=28, gender="F"
+    )
+    member3 = Member(
+        member_id="M003", first_name="Bob", last_name="Jones", age=42, gender="M"
+    )
+    member4 = Member(
+        member_id="M004", first_name="Alex", last_name="Brown", age=37, gender="M"
+    )
+    registry.members = [member1, member2, member3, member4]
+
+    series = SeriesScoring()
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    # Race: John 1st, Alex 2nd, Bob 3rd, Jane 4th
+    # John M30-39 1st (15 age pts), Alex M30-39 2nd (14),
+    # Bob M40-49 1st (15), Jane F20-29 1st (15)
+    matches = [
+        MatchResult(
+            race_result=RaceResult(place=1, name="John Doe", time="18:30"),
+            member=member1,
+            matched=True,
+        ),
+        MatchResult(
+            race_result=RaceResult(place=2, name="Alex Brown", time="19:00"),
+            member=member4,
+            matched=True,
+        ),
+        MatchResult(
+            race_result=RaceResult(place=3, name="Bob Jones", time="19:30"),
+            member=member3,
+            matched=True,
+        ),
+        MatchResult(
+            race_result=RaceResult(place=4, name="Jane Smith", time="20:00"),
+            member=member2,
+            matched=True,
+        ),
+    ]
+    race_points = calculator.calculate_race_points(matches, "Race 1")
+    series.add_race_points(race_points)
+
+    category_standings = series.calculate_category_standings(registry)
+
+    # M_30-39: John (15 age pts), Alex (14)
+    assert "M_30-39" in category_standings
+    m_30_39 = category_standings["M_30-39"]
+    assert len(m_30_39) == 2
+    assert m_30_39[0].member_id == "M001"
+    assert m_30_39[0].total_points == 15  # Only age group points
+    assert m_30_39[1].member_id == "M004"
+    assert m_30_39[1].total_points == 14
+
+    # M_40-49: Bob (15 age pts)
+    assert "M_40-49" in category_standings
+    m_40_49 = category_standings["M_40-49"]
+    assert len(m_40_49) == 1
+    assert m_40_49[0].member_id == "M003"
+    assert m_40_49[0].total_points == 15
+
+    # F_20-29: Jane (15 age pts)
+    assert "F_20-29" in category_standings
+    f_20_29 = category_standings["F_20-29"]
+    assert len(f_20_29) == 1
+    assert f_20_29[0].member_id == "M002"
+    assert f_20_29[0].total_points == 15
+
+
+def test_calculate_category_standings_max_races():
+    """Test that category standings respect max_races limit."""
+    registry = MemberRegistry()
+    member = Member(
+        member_id="M001", first_name="John", last_name="Doe", age=35, gender="M"
+    )
+    registry.members = [member]
+
+    series = SeriesScoring()
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    # Add 10 races
+    for i in range(10):
+        match = MatchResult(
+            race_result=RaceResult(place=i + 1, name="John Doe", time="18:30"),
+            member=member,
+            matched=True,
+        )
+        race_points = calculator.calculate_race_points([match], f"Race {i + 1}")
+        series.add_race_points(race_points)
+
+    category_standings = series.calculate_category_standings(registry, max_races=7)
+
+    # M_overall should count top 7 overall point races
+    m_overall = category_standings["M_overall"]
+    assert m_overall[0].races_completed == 7
+    # Top 7 overall: 75, 73, 71, 69, 67, 65, 63 = 483
+    assert m_overall[0].total_points == 483
+
+    # M_30-39 should count top 7 age group point races (all 15 pts)
+    m_30_39 = category_standings["M_30-39"]
+    assert m_30_39[0].races_completed == 7
+    assert m_30_39[0].total_points == 7 * 15  # 105
+
+
+def test_calculate_category_standings_all_age_groups():
+    """Test that all age groups are represented in category standings."""
+    registry = MemberRegistry()
+
+    # Create members in each age group for both genders
+    members = [
+        Member(member_id="M01", first_name="A", last_name="U20M", age=18, gender="M"),
+        Member(member_id="M02", first_name="B", last_name="U20F", age=19, gender="F"),
+        Member(member_id="M03", first_name="C", last_name="20M", age=25, gender="M"),
+        Member(member_id="M04", first_name="D", last_name="20F", age=27, gender="F"),
+        Member(member_id="M05", first_name="E", last_name="30M", age=35, gender="M"),
+        Member(member_id="M06", first_name="F", last_name="30F", age=37, gender="F"),
+        Member(member_id="M07", first_name="G", last_name="40M", age=45, gender="M"),
+        Member(member_id="M08", first_name="H", last_name="40F", age=47, gender="F"),
+        Member(member_id="M09", first_name="I", last_name="50M", age=55, gender="M"),
+        Member(member_id="M10", first_name="J", last_name="50F", age=57, gender="F"),
+        Member(member_id="M11", first_name="K", last_name="60M", age=65, gender="M"),
+        Member(member_id="M12", first_name="L", last_name="60F", age=67, gender="F"),
+        Member(member_id="M13", first_name="M", last_name="70M", age=75, gender="M"),
+        Member(member_id="M14", first_name="N", last_name="70F", age=77, gender="F"),
+        Member(member_id="M15", first_name="O", last_name="80M", age=85, gender="M"),
+        Member(member_id="M16", first_name="P", last_name="80F", age=87, gender="F"),
+    ]
+    registry.members = members
+
+    series = SeriesScoring()
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    # Create a race with all members
+    matches = [
+        MatchResult(
+            race_result=RaceResult(place=i + 1, name=m.full_name, time="20:00"),
+            member=m,
+            matched=True,
+        )
+        for i, m in enumerate(members)
+    ]
+    race_points = calculator.calculate_race_points(matches, "Test Race")
+    series.add_race_points(race_points)
+
+    category_standings = series.calculate_category_standings(registry)
+
+    # Check all age group categories exist
+    expected_categories = [
+        "M_overall",
+        "F_overall",
+        "M_U20",
+        "F_U20",
+        "M_20-29",
+        "F_20-29",
+        "M_30-39",
+        "F_30-39",
+        "M_40-49",
+        "F_40-49",
+        "M_50-59",
+        "F_50-59",
+        "M_60-69",
+        "F_60-69",
+        "M_70-79",
+        "F_70-79",
+        "M_80+",
+        "F_80+",
+    ]
+
+    for category in expected_categories:
+        assert category in category_standings, f"Category {category} not found"
+        assert len(category_standings[category]) > 0
+
+
+def test_calculate_category_standings_skips_no_gender():
+    """Test that members without gender are excluded from category standings."""
+    registry = MemberRegistry()
+    member1 = Member(
+        member_id="M001", first_name="John", last_name="Doe", age=35, gender="M"
+    )
+    member2 = Member(
+        member_id="M002",
+        first_name="Unknown",
+        last_name="Person",
+        age=30,
+        gender=None,
+    )
+    registry.members = [member1, member2]
+
+    series = SeriesScoring()
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    matches = [
+        MatchResult(
+            race_result=RaceResult(place=1, name="John Doe", time="18:30"),
+            member=member1,
+            matched=True,
+        ),
+        MatchResult(
+            race_result=RaceResult(place=2, name="Unknown Person", time="19:00"),
+            member=member2,
+            matched=True,
+        ),
+    ]
+    race_points = calculator.calculate_race_points(matches, "Test Race")
+    series.add_race_points(race_points)
+
+    category_standings = series.calculate_category_standings(registry)
+
+    # Only M_overall and M_30-39 should exist
+    assert "M_overall" in category_standings
+    assert "M_30-39" in category_standings
+    assert "F_overall" not in category_standings
+    assert len(category_standings["M_overall"]) == 1

@@ -12,7 +12,7 @@ from krra_race_series.cli import main
 
 def test_main_basic_execution(tmp_path, sample_members_csv, sample_race_csv):
     """Test basic CLI execution with required arguments."""
-    output_file = tmp_path / "results.csv"
+    output_dir = tmp_path / "results"
 
     test_args = [
         "krra-scoring",
@@ -21,19 +21,24 @@ def test_main_basic_execution(tmp_path, sample_members_csv, sample_race_csv):
         "--races",
         str(sample_race_csv),
         "--output",
-        str(output_file),
+        str(output_dir),
     ]
 
     with patch.object(sys, "argv", test_args):
         main()
 
-    # Verify output file was created
-    assert output_file.exists()
+    # Verify output directory was created
+    assert output_dir.exists()
+    assert output_dir.is_dir()
 
-    # Verify content
-    content = output_file.read_text()
+    # Verify category files were created
+    assert (output_dir / "M_overall.csv").exists()
+    assert (output_dir / "F_overall.csv").exists()
+
+    # Verify content of one file
+    content = (output_dir / "M_overall.csv").read_text()
     assert '"Rank"' in content and '"Member ID"' in content
-    assert "John Doe" in content or "Jane Smith" in content
+    assert "John Doe" in content
 
 
 def test_main_with_multiple_races(tmp_path, sample_members_csv, sample_race_csv):
@@ -45,7 +50,7 @@ def test_main_with_multiple_races(tmp_path, sample_members_csv, sample_race_csv)
         "2,John Doe,33:45,35,M,101\n"
     )
 
-    output_file = tmp_path / "results.csv"
+    output_dir = tmp_path / "results"
 
     test_args = [
         "krra-scoring",
@@ -55,18 +60,19 @@ def test_main_with_multiple_races(tmp_path, sample_members_csv, sample_race_csv)
         str(sample_race_csv),
         str(race_file_2),
         "--output",
-        str(output_file),
+        str(output_dir),
     ]
 
     with patch.object(sys, "argv", test_args):
         main()
 
-    assert output_file.exists()
+    assert output_dir.exists()
+    assert (output_dir / "M_overall.csv").exists()
 
 
-def test_main_with_detailed_output(tmp_path, sample_members_csv, sample_race_csv):
-    """Test CLI execution with detailed output flag."""
-    output_file = tmp_path / "detailed_results.csv"
+def test_main_with_categories_filter(tmp_path, sample_members_csv, sample_race_csv):
+    """Test CLI execution with categories filter."""
+    output_dir = tmp_path / "results"
 
     test_args = [
         "krra-scoring",
@@ -75,23 +81,19 @@ def test_main_with_detailed_output(tmp_path, sample_members_csv, sample_race_csv
         "--races",
         str(sample_race_csv),
         "--output",
-        str(output_file),
-        "--detailed",
+        str(output_dir),
+        "--categories",
+        "M_overall,F_20-29",
     ]
 
     with patch.object(sys, "argv", test_args):
         main()
 
-    # Verify output file was created
-    assert output_file.exists()
-
-    # Detailed CSV should have more columns
-    content = output_file.read_text()
-    assert (
-        '"Race"' in content
-        and '"Overall Place"' in content
-        and '"Overall Points"' in content
-    )
+    # Verify only requested category files were created
+    assert (output_dir / "M_overall.csv").exists()
+    assert (output_dir / "F_20-29.csv").exists()
+    assert not (output_dir / "F_overall.csv").exists()
+    assert not (output_dir / "M_30-39.csv").exists()
 
 
 def test_main_default_output_path(tmp_path, sample_members_csv, sample_race_csv):
@@ -99,11 +101,10 @@ def test_main_default_output_path(tmp_path, sample_members_csv, sample_race_csv)
     # Create the default output directory
     default_output_dir = Path("data/output")
     default_output_dir.mkdir(parents=True, exist_ok=True)
-    default_output_file = default_output_dir / "series_results.csv"
 
-    # Clean up if it exists from previous runs
-    if default_output_file.exists():
-        default_output_file.unlink()
+    # Clean up any existing category files
+    for f in default_output_dir.glob("*.csv"):
+        f.unlink()
 
     test_args = [
         "krra-scoring",
@@ -117,17 +118,18 @@ def test_main_default_output_path(tmp_path, sample_members_csv, sample_race_csv)
         with patch.object(sys, "argv", test_args):
             main()
 
-        # Verify default output file was created
-        assert default_output_file.exists()
+        # Verify category files were created in default output directory
+        assert (default_output_dir / "M_overall.csv").exists()
+        assert (default_output_dir / "F_overall.csv").exists()
     finally:
         # Clean up
-        if default_output_file.exists():
-            default_output_file.unlink()
+        for f in default_output_dir.glob("*.csv"):
+            f.unlink()
 
 
 def test_main_creates_output_directory(tmp_path, sample_members_csv, sample_race_csv):
     """Test that CLI creates output directory if it doesn't exist."""
-    output_file = tmp_path / "nested" / "dir" / "results.csv"
+    output_dir = tmp_path / "nested" / "dir" / "results"
 
     test_args = [
         "krra-scoring",
@@ -136,20 +138,21 @@ def test_main_creates_output_directory(tmp_path, sample_members_csv, sample_race
         "--races",
         str(sample_race_csv),
         "--output",
-        str(output_file),
+        str(output_dir),
     ]
 
     with patch.object(sys, "argv", test_args):
         main()
 
-    assert output_file.exists()
+    assert output_dir.exists()
+    assert (output_dir / "M_overall.csv").exists()
 
 
 def test_main_prints_progress_messages(
     tmp_path, sample_members_csv, sample_race_csv, capsys
 ):
     """Test that CLI prints progress messages."""
-    output_file = tmp_path / "results.csv"
+    output_dir = tmp_path / "results"
 
     test_args = [
         "krra-scoring",
@@ -158,7 +161,7 @@ def test_main_prints_progress_messages(
         "--races",
         str(sample_race_csv),
         "--output",
-        str(output_file),
+        str(output_dir),
     ]
 
     with patch.object(sys, "argv", test_args):
@@ -172,17 +175,17 @@ def test_main_prints_progress_messages(
     assert "Processing race" in captured.out
     assert "finishers" in captured.out
     assert "matched with members" in captured.out
-    assert "Calculating series totals" in captured.out
-    assert "Exporting results" in captured.out
-    assert "Top 10 standings" in captured.out
+    assert "Calculating category standings" in captured.out
+    assert "Exporting category standings" in captured.out
+    assert "Category Standings Summary" in captured.out
     assert "Complete!" in captured.out
 
 
 def test_main_prints_top_10_standings(
     tmp_path, sample_members_csv, sample_race_csv, capsys
 ):
-    """Test that CLI prints top 10 standings."""
-    output_file = tmp_path / "results.csv"
+    """Test that CLI prints category standings summary."""
+    output_dir = tmp_path / "results"
 
     test_args = [
         "krra-scoring",
@@ -191,7 +194,7 @@ def test_main_prints_top_10_standings(
         "--races",
         str(sample_race_csv),
         "--output",
-        str(output_file),
+        str(output_dir),
     ]
 
     with patch.object(sys, "argv", test_args):
@@ -205,8 +208,10 @@ def test_main_prints_top_10_standings(
         line for line in output_lines if "points" in line and "races" in line
     ]
 
-    # Should have at least one standing line
+    # Should have at least one standing line per category
     assert len(standings_section) > 0
+    # Should show category names
+    assert "M_overall:" in captured.out or "F_overall:" in captured.out
 
 
 def test_main_missing_required_arguments():
@@ -219,7 +224,7 @@ def test_main_missing_required_arguments():
 
 def test_main_with_nonexistent_members_file(tmp_path, sample_race_csv):
     """Test CLI behavior with non-existent members file."""
-    output_file = tmp_path / "results.csv"
+    output_dir = tmp_path / "results"
 
     test_args = [
         "krra-scoring",
@@ -228,7 +233,7 @@ def test_main_with_nonexistent_members_file(tmp_path, sample_race_csv):
         "--races",
         str(sample_race_csv),
         "--output",
-        str(output_file),
+        str(output_dir),
     ]
 
     with patch.object(sys, "argv", test_args), pytest.raises(FileNotFoundError):
@@ -237,7 +242,7 @@ def test_main_with_nonexistent_members_file(tmp_path, sample_race_csv):
 
 def test_main_with_nonexistent_race_file(tmp_path, sample_members_csv):
     """Test CLI behavior with non-existent race file."""
-    output_file = tmp_path / "results.csv"
+    output_dir = tmp_path / "results"
 
     test_args = [
         "krra-scoring",
@@ -246,7 +251,7 @@ def test_main_with_nonexistent_race_file(tmp_path, sample_members_csv):
         "--races",
         str(tmp_path / "nonexistent_race.csv"),
         "--output",
-        str(output_file),
+        str(output_dir),
     ]
 
     with patch.object(sys, "argv", test_args), pytest.raises(FileNotFoundError):
@@ -255,7 +260,7 @@ def test_main_with_nonexistent_race_file(tmp_path, sample_members_csv):
 
 def test_cli_module_main_block(tmp_path, sample_members_csv, sample_race_csv):
     """Test the if __name__ == '__main__' block by running the module."""
-    output_file = tmp_path / "results.csv"
+    output_dir = tmp_path / "results"
 
     # Create a test script that imports and runs the CLI module's main block
     test_script = tmp_path / "run_cli.py"
@@ -269,7 +274,7 @@ sys.argv = [
     'cli.py',
     '--members', '{sample_members_csv}',
     '--races', '{sample_race_csv}',
-    '--output', '{output_file}'
+    '--output', '{output_dir}'
 ]
 
 # Import and run the CLI module as if it were executed directly
@@ -286,4 +291,5 @@ if __name__ == '__main__':
 
     # Verify it executed successfully
     assert result.returncode == 0
-    assert output_file.exists()
+    assert output_dir.exists()
+    assert (output_dir / "M_overall.csv").exists()

@@ -29,14 +29,18 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("data/output/series_results.csv"),
-        help="Path for the output CSV file",
+        default=Path("data/output"),
+        help="Directory for category standings output files (default: data/output)",
     )
 
     parser.add_argument(
-        "--detailed",
-        action="store_true",
-        help="Export detailed results with individual race points",
+        "--categories",
+        type=str,
+        help=(
+            "Comma-separated list of categories to generate "
+            "(e.g., 'M_overall,F_30-39,M_50-59'). "
+            "If not specified, all categories are generated."
+        ),
     )
 
     args = parser.parse_args()
@@ -69,25 +73,40 @@ def main() -> None:
         race_points = calculator.calculate_race_points(matches, race.name)
         series.add_race_points(race_points)
 
-    # Calculate series totals
-    print("\nCalculating series totals...")
-    totals = series.calculate_series_totals(member_registry)
+    # Calculate category standings
+    print("\nCalculating category standings...")
+    category_standings = series.calculate_category_standings(member_registry)
 
-    # Export results
-    print(f"\nExporting results to {args.output}...")
-    if args.detailed:
-        exporter.export_detailed_csv(totals, args.output)
+    # Filter categories if specified
+    if args.categories:
+        requested_categories = [c.strip() for c in args.categories.split(",")]
+        category_standings = {
+            cat: standings
+            for cat, standings in category_standings.items()
+            if cat in requested_categories
+        }
+        print(f"Generating {len(category_standings)} requested categories")
     else:
-        exporter.export_to_csv(totals, args.output)
+        print(f"Generating all {len(category_standings)} categories")
 
-    print("\nTop 10 standings:")
-    for i, total in enumerate(totals[:10], start=1):
-        print(
-            f"  {i}. {total.member_name} - {total.total_points} points "
-            f"({total.races_completed} races)"
-        )
+    # Export category results
+    print(f"\nExporting category standings to {args.output}/...")
+    exporter.export_category_standings(category_standings, args.output)
 
-    print(f"\n✓ Complete! Results exported to {args.output}")
+    # Display summary for each category
+    print("\nCategory Standings Summary:")
+    for category_name in sorted(category_standings.keys()):
+        totals = category_standings[category_name]
+        print(f"\n{category_name}:")
+        for i, total in enumerate(totals[:5], start=1):
+            print(
+                f"  {i}. {total.member_name} - {total.total_points} points "
+                f"({total.races_completed} races)"
+            )
+        if len(totals) > 5:
+            print(f"  ... and {len(totals) - 5} more")
+
+    print(f"\n✓ Complete! Category standings exported to {args.output}/")
 
 
 if __name__ == "__main__":

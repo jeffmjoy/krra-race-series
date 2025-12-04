@@ -22,7 +22,7 @@ class RaceType(Enum):
 class AgeGroup(Enum):
     """Age group categories for race series."""
 
-    UNDER_20 = "<=19"
+    UNDER_20 = "U20"
     AGE_20_29 = "20-29"
     AGE_30_39 = "30-39"
     AGE_40_49 = "40-49"
@@ -308,3 +308,96 @@ class SeriesScoring:
         totals.sort(key=lambda x: x.total_points, reverse=True)
 
         return totals
+
+    def calculate_category_standings(
+        self, member_registry: MemberRegistry, max_races: int = 7
+    ) -> dict[str, list[SeriesTotal]]:
+        """Calculate series standings for each age group and gender category.
+
+        For overall categories (M_overall, F_overall), only overall points are used.
+        For age group categories (M_30-39, F_U20, etc.), only age group points are used.
+
+        Args:
+            member_registry: Registry to get member names and demographics
+            max_races: Maximum number of races that count (default 7)
+
+        Returns:
+            Dictionary mapping category names (e.g., "M_overall", "F_30-39")
+            to ranked lists of SeriesTotal objects
+        """
+        # Group points by member
+        member_points: dict[str, list[RacePoints]] = {}
+
+        for race_point in self.all_race_points:
+            if race_point.member_id not in member_points:
+                member_points[race_point.member_id] = []
+            member_points[race_point.member_id].append(race_point)
+
+        # Build category standings
+        category_standings: dict[str, list[SeriesTotal]] = {}
+
+        for member_id, points_list in member_points.items():
+            member = next(
+                (
+                    m
+                    for m in member_registry.get_all_members()
+                    if m.member_id == member_id
+                ),
+                None,
+            )
+
+            if not member or not member.gender:
+                continue
+
+            member_name = member.full_name
+            gender = member.gender
+            age_group = AgeGroup.from_age(member.age)
+
+            # Overall category - use overall points only
+            overall_category = f"{gender}_overall"
+            sorted_overall = sorted(
+                points_list, key=lambda x: x.overall_points, reverse=True
+            )
+            counted_overall = sorted_overall[:max_races]
+
+            if overall_category not in category_standings:
+                category_standings[overall_category] = []
+
+            category_standings[overall_category].append(
+                SeriesTotal(
+                    member_id=member_id,
+                    member_name=member_name,
+                    races_completed=len(counted_overall),
+                    total_points=sum(p.overall_points for p in counted_overall),
+                    race_details=counted_overall,
+                )
+            )
+
+            # Age group category - use age group points only
+            if age_group:
+                age_category = f"{gender}_{age_group.value}"
+                sorted_age_group = sorted(
+                    points_list, key=lambda x: x.age_group_points, reverse=True
+                )
+                counted_age_group = sorted_age_group[:max_races]
+
+                if age_category not in category_standings:
+                    category_standings[age_category] = []
+
+                category_standings[age_category].append(
+                    SeriesTotal(
+                        member_id=member_id,
+                        member_name=member_name,
+                        races_completed=len(counted_age_group),
+                        total_points=sum(p.age_group_points for p in counted_age_group),
+                        race_details=counted_age_group,
+                    )
+                )
+
+        # Sort each category by total points (descending)
+        for category in category_standings:
+            category_standings[category].sort(
+                key=lambda x: x.total_points, reverse=True
+            )
+
+        return category_standings
