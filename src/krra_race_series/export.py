@@ -2,9 +2,12 @@
 
 import csv
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .scoring import SeriesTotal
+
+if TYPE_CHECKING:
+    from .age_grading import AgeGradedSeriesTotal
 
 
 class ResultsExporter:
@@ -214,3 +217,41 @@ class ResultsExporter:
                                 total.total_points,
                             ]
                         )
+
+    def export_age_graded_standings(
+        self,
+        standings: list["AgeGradedSeriesTotal"],
+        output_path: Path,
+    ) -> None:
+        """Export age-graded standings to a CSV file.
+
+        Args:
+            standings: List of age-graded series totals to export
+            output_path: Path where the CSV file will be written
+        """
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(output_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
+
+            # Write header
+            header = [
+                "Rank",
+                "Member ID",
+                "Name",
+                "Races",
+                "Avg Age-Graded %",
+            ]
+            writer.writerow(header)
+
+            # Write data
+            for rank, total in enumerate(standings, start=1):
+                writer.writerow(
+                    [
+                        rank,
+                        self._sanitize_csv_field(total.member_id),
+                        self._sanitize_csv_field(total.member_name),
+                        total.races_completed,
+                        f"{total.average_age_graded_percentage:.2f}",
+                    ]
+                )

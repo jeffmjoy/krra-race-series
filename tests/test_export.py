@@ -689,3 +689,96 @@ def test_export_total_points_equals_sum_of_race_columns(tmp_path):
 
         assert race_1 + race_2 + race_3 == total
         assert total == expected_total
+
+
+def test_export_age_graded_standings(tmp_path):
+    """Test exporting age-graded standings to CSV."""
+    from krra_race_series.age_grading import AgeGradedSeriesTotal
+
+    exporter = ResultsExporter()
+
+    standings = [
+        AgeGradedSeriesTotal(
+            member_id="M001",
+            member_name="John Doe",
+            races_completed=2,
+            average_age_graded_percentage=95.5,
+            race_details=[],
+        ),
+        AgeGradedSeriesTotal(
+            member_id="F001",
+            member_name="Jane Smith",
+            races_completed=1,
+            average_age_graded_percentage=98.2,
+            race_details=[],
+        ),
+    ]
+
+    output_path = tmp_path / "age_graded.csv"
+    exporter.export_age_graded_standings(standings, output_path)
+
+    # Verify file was created
+    assert output_path.exists()
+
+    # Verify content
+    with open(output_path) as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+        # Check header
+        assert rows[0] == ["Rank", "Member ID", "Name", "Races", "Avg Age-Graded %"]
+
+        # Check first member
+        assert rows[1][0] == "1"
+        assert rows[1][1] == "M001"
+        assert rows[1][2] == "John Doe"
+        assert rows[1][3] == "2"
+        assert rows[1][4] == "95.50"
+
+        # Check second member
+        assert rows[2][0] == "2"
+        assert rows[2][1] == "F001"
+        assert rows[2][2] == "Jane Smith"
+        assert rows[2][3] == "1"
+        assert rows[2][4] == "98.20"
+
+
+def test_export_age_graded_standings_creates_directory(tmp_path):
+    """Test that export creates output directory if it doesn't exist."""
+    from krra_race_series.age_grading import AgeGradedSeriesTotal
+
+    exporter = ResultsExporter()
+
+    standings = [
+        AgeGradedSeriesTotal(
+            member_id="M001",
+            member_name="John Doe",
+            races_completed=1,
+            average_age_graded_percentage=95.5,
+            race_details=[],
+        ),
+    ]
+
+    output_path = tmp_path / "subdir" / "age_graded.csv"
+    exporter.export_age_graded_standings(standings, output_path)
+
+    assert output_path.exists()
+    assert output_path.parent.exists()
+
+
+def test_export_age_graded_standings_empty(tmp_path):
+    """Test exporting empty age-graded standings."""
+    exporter = ResultsExporter()
+
+    standings = []
+
+    output_path = tmp_path / "age_graded.csv"
+    exporter.export_age_graded_standings(standings, output_path)
+
+    # File should be created with just header
+    with open(output_path) as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+        assert len(rows) == 1  # Only header
+        assert rows[0] == ["Rank", "Member ID", "Name", "Races", "Avg Age-Graded %"]
+
