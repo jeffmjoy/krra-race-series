@@ -592,3 +592,119 @@ def test_calculate_category_standings_skips_no_gender():
     assert "M_30-39" in category_standings
     assert "F_overall" not in category_standings
     assert len(category_standings["M_overall"]) == 1
+
+
+def test_series_scoring_tracks_race_names():
+    """Test that SeriesScoring correctly tracks race names in order."""
+    series = SeriesScoring()
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    member = Member(
+        member_id="M001", first_name="John", last_name="Doe", age=35, gender="M"
+    )
+
+    # Add races in a specific order
+    for race_name in ["Spring 5K", "Summer 8K", "Fall 10K"]:
+        match = MatchResult(
+            race_result=RaceResult(place=1, name="John Doe", time="18:30"),
+            member=member,
+            matched=True,
+        )
+        race_points = calculator.calculate_race_points([match], race_name)
+        series.add_race_points(race_points)
+
+    race_names = series.get_race_names()
+    assert race_names == ["Spring 5K", "Summer 8K", "Fall 10K"]
+
+
+def test_series_scoring_does_not_duplicate_race_names():
+    """Test that race names are not duplicated even when called multiple times."""
+    series = SeriesScoring()
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    member = Member(
+        member_id="M001", first_name="John", last_name="Doe", age=35, gender="M"
+    )
+
+    # Add the same race twice (edge case)
+    for _ in range(2):
+        match = MatchResult(
+            race_result=RaceResult(place=1, name="John Doe", time="18:30"),
+            member=member,
+            matched=True,
+        )
+        race_points = calculator.calculate_race_points([match], "Spring 5K")
+        series.add_race_points(race_points)
+
+    race_names = series.get_race_names()
+    assert race_names == ["Spring 5K"]
+
+
+def test_series_totals_include_race_points_by_race():
+    """Test that SeriesTotal includes race_points_by_race breakdown."""
+    registry = MemberRegistry()
+    member = Member(
+        member_id="M001", first_name="John", last_name="Doe", age=35, gender="M"
+    )
+    registry.members = [member]
+
+    series = SeriesScoring()
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    # Add two races with different placements
+    for race_name, place in [("Spring 5K", 1), ("Summer 8K", 3)]:
+        match = MatchResult(
+            race_result=RaceResult(place=place, name="John Doe", time="18:30"),
+            member=member,
+            matched=True,
+        )
+        race_points = calculator.calculate_race_points([match], race_name)
+        series.add_race_points(race_points)
+
+    totals = series.calculate_series_totals(registry)
+
+    assert len(totals) == 1
+    assert totals[0].race_points_by_race is not None
+    # Spring 5K: 75 overall + 15 age = 90
+    # Summer 8K: 71 overall + 15 age = 86
+    assert totals[0].race_points_by_race["Spring 5K"] == 90
+    assert totals[0].race_points_by_race["Summer 8K"] == 86
+    assert totals[0].total_points == 90 + 86
+
+
+def test_category_standings_include_race_points_by_race():
+    """Test that category standings include race_points_by_race breakdown."""
+    registry = MemberRegistry()
+    member = Member(
+        member_id="M001", first_name="John", last_name="Doe", age=35, gender="M"
+    )
+    registry.members = [member]
+
+    series = SeriesScoring()
+    calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
+
+    # Add two races with different placements
+    for race_name, place in [("Spring 5K", 1), ("Summer 8K", 3)]:
+        match = MatchResult(
+            race_result=RaceResult(place=place, name="John Doe", time="18:30"),
+            member=member,
+            matched=True,
+        )
+        race_points = calculator.calculate_race_points([match], race_name)
+        series.add_race_points(race_points)
+
+    category_standings = series.calculate_category_standings(registry)
+
+    # Check M_overall uses overall points only
+    m_overall = category_standings["M_overall"][0]
+    assert m_overall.race_points_by_race is not None
+    assert m_overall.race_points_by_race["Spring 5K"] == 75  # overall points only
+    assert m_overall.race_points_by_race["Summer 8K"] == 71
+    assert m_overall.total_points == 75 + 71
+
+    # Check M_30-39 uses age group points only
+    m_30_39 = category_standings["M_30-39"][0]
+    assert m_30_39.race_points_by_race is not None
+    assert m_30_39.race_points_by_race["Spring 5K"] == 15  # age group points only
+    assert m_30_39.race_points_by_race["Summer 8K"] == 15
+    assert m_30_39.total_points == 15 + 15

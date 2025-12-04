@@ -469,3 +469,223 @@ def test_export_category_standings_all_age_groups(tmp_path):
 
     for filename in expected_files:
         assert (output_dir / filename).exists(), f"Missing file: {filename}"
+
+
+def test_export_to_csv_with_race_columns(tmp_path):
+    """Test exporting to CSV with individual race columns instead of Races count."""
+    exporter = ResultsExporter()
+
+    totals = [
+        SeriesTotal(
+            member_id="M001",
+            member_name="John Doe",
+            races_completed=2,
+            total_points=180,
+            race_details=[],
+            race_points_by_race={"Spring 5K": 90, "Summer 8K": 90},
+        ),
+        SeriesTotal(
+            member_id="M002",
+            member_name="Jane Smith",
+            races_completed=1,
+            total_points=88,
+            race_details=[],
+            race_points_by_race={"Spring 5K": 88},
+        ),
+    ]
+
+    output_path = tmp_path / "results.csv"
+    race_names = ["Spring 5K", "Summer 8K"]
+    exporter.export_to_csv(totals, output_path, race_names)
+
+    assert output_path.exists()
+
+    with open(output_path) as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+        # Check header has race columns
+        assert rows[0] == [
+            "Rank",
+            "Member ID",
+            "Name",
+            "Spring 5K",
+            "Summer 8K",
+            "Total Points",
+        ]
+        # John participated in both races
+        assert rows[1] == ["1", "M001", "John Doe", "90", "90", "180"]
+        # Jane only participated in Spring 5K
+        assert rows[2] == ["2", "M002", "Jane Smith", "88", "", "88"]
+
+
+def test_export_to_csv_with_race_columns_empty_values(tmp_path):
+    """Test CSV export with race columns shows empty strings for non-participation."""
+    exporter = ResultsExporter()
+
+    totals = [
+        SeriesTotal(
+            member_id="M001",
+            member_name="John Doe",
+            races_completed=1,
+            total_points=75,
+            race_details=[],
+            race_points_by_race={"Race 2": 75},  # Only participated in Race 2
+        ),
+    ]
+
+    output_path = tmp_path / "results.csv"
+    race_names = ["Race 1", "Race 2", "Race 3"]
+    exporter.export_to_csv(totals, output_path, race_names)
+
+    with open(output_path) as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+        assert rows[0] == [
+            "Rank",
+            "Member ID",
+            "Name",
+            "Race 1",
+            "Race 2",
+            "Race 3",
+            "Total Points",
+        ]
+        # Race 1 and Race 3 should be empty
+        assert rows[1] == ["1", "M001", "John Doe", "", "75", "", "75"]
+
+
+def test_export_to_csv_without_race_names_uses_races_column(tmp_path):
+    """Test that export falls back to 'Races' column when race_names not provided."""
+    exporter = ResultsExporter()
+
+    totals = [
+        SeriesTotal(
+            member_id="M001",
+            member_name="John Doe",
+            races_completed=2,
+            total_points=180,
+            race_details=[],
+        ),
+    ]
+
+    output_path = tmp_path / "results.csv"
+    exporter.export_to_csv(totals, output_path)  # No race_names
+
+    with open(output_path) as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+        # Should use the old format with Races column
+        assert rows[0] == ["Rank", "Member ID", "Name", "Races", "Total Points"]
+        assert rows[1] == ["1", "M001", "John Doe", "2", "180"]
+
+
+def test_export_category_standings_with_race_columns(tmp_path):
+    """Test category standings export with individual race columns."""
+    exporter = ResultsExporter()
+
+    category_standings = {
+        "M_overall": [
+            SeriesTotal(
+                member_id="M001",
+                member_name="John Doe",
+                races_completed=2,
+                total_points=146,
+                race_details=[],
+                race_points_by_race={"Spring 5K": 75, "Summer 8K": 71},
+            ),
+            SeriesTotal(
+                member_id="M002",
+                member_name="Bob Jones",
+                races_completed=1,
+                total_points=73,
+                race_details=[],
+                race_points_by_race={"Spring 5K": 73},
+            ),
+        ],
+    }
+
+    output_dir = tmp_path / "category_results"
+    race_names = ["Spring 5K", "Summer 8K"]
+    exporter.export_category_standings(category_standings, output_dir, race_names)
+
+    with open(output_dir / "M_overall.csv") as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+        # Header should have race columns
+        assert rows[0] == [
+            "Rank",
+            "Member ID",
+            "Name",
+            "Spring 5K",
+            "Summer 8K",
+            "Total Points",
+        ]
+        assert rows[1] == ["1", "M001", "John Doe", "75", "71", "146"]
+        assert rows[2] == ["2", "M002", "Bob Jones", "73", "", "73"]
+
+
+def test_export_category_standings_without_race_names(tmp_path):
+    """Test category standings falls back to Races column when race_names not given."""
+    exporter = ResultsExporter()
+
+    category_standings = {
+        "M_overall": [
+            SeriesTotal(
+                member_id="M001",
+                member_name="John Doe",
+                races_completed=3,
+                total_points=225,
+                race_details=[],
+            ),
+        ],
+    }
+
+    output_dir = tmp_path / "results"
+    exporter.export_category_standings(category_standings, output_dir)  # No race_names
+
+    with open(output_dir / "M_overall.csv") as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+        # Should use old format
+        assert rows[0] == ["Rank", "Member ID", "Name", "Races", "Total Points"]
+        assert rows[1] == ["1", "M001", "John Doe", "3", "225"]
+
+
+def test_export_total_points_equals_sum_of_race_columns(tmp_path):
+    """Test that total points equals the sum of individual race points columns."""
+    exporter = ResultsExporter()
+
+    race_points = {"Race 1": 75, "Race 2": 73, "Race 3": 71}
+    expected_total = sum(race_points.values())
+
+    totals = [
+        SeriesTotal(
+            member_id="M001",
+            member_name="John Doe",
+            races_completed=3,
+            total_points=expected_total,
+            race_details=[],
+            race_points_by_race=race_points,
+        ),
+    ]
+
+    output_path = tmp_path / "results.csv"
+    race_names = ["Race 1", "Race 2", "Race 3"]
+    exporter.export_to_csv(totals, output_path, race_names)
+
+    with open(output_path) as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+        # Parse the race columns and verify they sum to total
+        race_1 = int(rows[1][3])
+        race_2 = int(rows[1][4])
+        race_3 = int(rows[1][5])
+        total = int(rows[1][6])
+
+        assert race_1 + race_2 + race_3 == total
+        assert total == expected_total
