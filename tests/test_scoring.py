@@ -387,15 +387,15 @@ def test_calculate_category_standings_age_groups():
         member_id="M003", first_name="Bob", last_name="Jones", age=42, gender="M"
     )
     member4 = Member(
-        member_id="M004", first_name="Alice", last_name="Brown", age=37, gender="M"
+        member_id="M004", first_name="Alex", last_name="Brown", age=37, gender="M"
     )
     registry.members = [member1, member2, member3, member4]
 
     series = SeriesScoring()
     calculator = PointsCalculator(PointsConfig(race_type=RaceType.RACE_75))
 
-    # Race: John 1st, Alice 2nd, Bob 3rd, Jane 4th
-    # John M30-39 1st (15 age pts), Alice M30-39 2nd (14),
+    # Race: John 1st, Alex 2nd, Bob 3rd, Jane 4th
+    # John M30-39 1st (15 age pts), Alex M30-39 2nd (14),
     # Bob M40-49 1st (15), Jane F20-29 1st (15)
     matches = [
         MatchResult(
@@ -404,7 +404,7 @@ def test_calculate_category_standings_age_groups():
             matched=True,
         ),
         MatchResult(
-            race_result=RaceResult(place=2, name="Alice Brown", time="19:00"),
+            race_result=RaceResult(place=2, name="Alex Brown", time="19:00"),
             member=member4,
             matched=True,
         ),
@@ -424,7 +424,7 @@ def test_calculate_category_standings_age_groups():
 
     category_standings = series.calculate_category_standings(registry)
 
-    # M_30-39: John (15 age pts), Alice (14)
+    # M_30-39: John (15 age pts), Alex (14)
     assert "M_30-39" in category_standings
     m_30_39 = category_standings["M_30-39"]
     assert len(m_30_39) == 2
