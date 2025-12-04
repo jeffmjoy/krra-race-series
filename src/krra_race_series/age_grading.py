@@ -33,6 +33,31 @@ class RaceDistance(Enum):
 # where open_standard is the world-class time for that distance
 # A higher factor means the age standard is slower (older age)
 
+# World-class reference times (in seconds) for open age group
+# These are approximate based on world records and WMA standards
+WORLD_CLASS_TIMES = {
+    RaceDistance.KM_5: {
+        "M": 12 * 60 + 51,  # 12:51 (approximate)
+        "F": 14 * 60 + 44,  # 14:44 (approximate)
+    },
+    RaceDistance.KM_8: {
+        "M": 21 * 60 + 15,  # 21:15 (approximate)
+        "F": 24 * 60 + 30,  # 24:30 (approximate)
+    },
+    RaceDistance.KM_10: {
+        "M": 26 * 60 + 24,  # 26:24 (approximate)
+        "F": 29 * 60 + 43,  # 29:43 (approximate)
+    },
+    RaceDistance.HALF_MARATHON: {
+        "M": 58 * 60 + 1,  # 58:01 (approximate)
+        "F": 65 * 60 + 15,  # 1:05:15 (approximate)
+    },
+    RaceDistance.MARATHON: {
+        "M": 2 * 3600 + 0 * 60 + 35,  # 2:00:35 (approximate)
+        "F": 2 * 3600 + 11 * 60 + 53,  # 2:11:53 (approximate)
+    },
+}
+
 # Simplified age-grading factors based on WMA 2020 tables
 # For a complete implementation, you would load all factors from WMA tables
 # These are sample factors showing the general pattern
@@ -409,15 +434,18 @@ class AgeGradingCalculator:
         except ValueError:
             return None
 
-        # Calculate age-graded percentage (compared to world-class performance)
-        # For now, we'll use the inverse of the factor as an approximation
-        # A proper implementation would use the actual world record times
-        # Age-graded percentage = (age_standard / actual_time) * 100
+        # Calculate age-graded percentage
+        # Age-graded % = (age_standard_time / actual_time) * 100
         # Since factor = open_standard / age_standard
-        # We approximate: percentage = (1 / factor) / (actual / age_standard) * 100
-        # Simplified: percentage = 100 / age_factor (rough approximation)
-        # Better: percentage based on ratio to world-class time
-        age_graded_percentage = (1.0 / age_factor) * 100.0
+        # We have: age_standard = open_standard / factor
+        # Therefore: age_graded % = (open_standard / factor / actual_time) * 100
+        world_class_time = WORLD_CLASS_TIMES.get(distance, {}).get(member.gender)
+        if not world_class_time:
+            # Fallback to simplified calculation if no world-class time available
+            age_graded_percentage = (1.0 / age_factor) * 100.0
+        else:
+            age_standard_time = world_class_time / age_factor
+            age_graded_percentage = (age_standard_time / actual_seconds) * 100.0
 
         return AgeGradedResult(
             member_id=member.member_id,
