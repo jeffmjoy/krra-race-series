@@ -76,7 +76,7 @@ This generates category standings files (e.g., `M_overall.csv`, `F_30-39.csv`) a
 
 #### Age-Graded Rankings
 
-The age-graded rankings use World Masters Athletics (WMA) 2020 age-grading factors to compare performances across ages and genders. This allows fair comparison of a 25-year-old woman, a 45-year-old man, and a 70-year-old runner on equal footing.
+The age-graded rankings use World Masters Athletics (WMA) 2020 age-grading factors to compare performances across ages and genders.
 
 To generate only specific categories:
 
@@ -96,7 +96,6 @@ python -m krra_race_series.cli \
   --races data/race_results/*.csv \
   --output data/output \
   --age-grading-year 2020
-```
 ```
 
 ## Data Formats
