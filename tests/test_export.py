@@ -781,4 +781,3 @@ def test_export_age_graded_standings_empty(tmp_path):
         rows = list(reader)
         assert len(rows) == 1  # Only header
         assert rows[0] == ["Rank", "Member ID", "Name", "Races", "Avg Age-Graded %"]
-

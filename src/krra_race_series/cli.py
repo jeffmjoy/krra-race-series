@@ -120,9 +120,7 @@ def main() -> None:
             + (" + age-graded" if include_age_graded else "")
         )
     else:
-        print(
-            f"Generating all {len(category_standings)} categories + age-graded"
-        )
+        print(f"Generating all {len(category_standings)} categories + age-graded")
 
     # Export category results
     print(f"\nExporting category standings to {args.output}/...")
