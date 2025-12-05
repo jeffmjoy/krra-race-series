@@ -240,7 +240,7 @@ class ResultsExporter:
                 "Member ID",
                 "Name",
                 "Races",
-                "Avg Age-Graded %",
+                "Avg %",
             ]
             writer.writerow(header)
 
