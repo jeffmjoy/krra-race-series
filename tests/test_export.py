@@ -692,11 +692,12 @@ def test_export_total_points_equals_sum_of_race_columns(tmp_path):
 
 
 def test_export_age_graded_standings(tmp_path):
-    """Test exporting age-graded standings to CSV."""
+    """Test exporting age-graded standings to CSV with per-race columns."""
     from krra_race_series.age_grading import AgeGradedSeriesTotal
 
     exporter = ResultsExporter()
 
+    race_names = ["spring_5k", "summer_8k"]
     standings = [
         AgeGradedSeriesTotal(
             member_id="M001",
@@ -704,6 +705,7 @@ def test_export_age_graded_standings(tmp_path):
             races_completed=2,
             average_age_graded_percentage=95.5,
             race_details=[],
+            race_percentages_by_race={"spring_5k": 94.0, "summer_8k": 97.0},
         ),
         AgeGradedSeriesTotal(
             member_id="F001",
@@ -711,11 +713,12 @@ def test_export_age_graded_standings(tmp_path):
             races_completed=1,
             average_age_graded_percentage=98.2,
             race_details=[],
+            race_percentages_by_race={"spring_5k": 98.2},
         ),
     ]
 
     output_path = tmp_path / "age_graded.csv"
-    exporter.export_age_graded_standings(standings, output_path)
+    exporter.export_age_graded_standings(standings, output_path, race_names)
 
     # Verify file was created
     assert output_path.exists()
@@ -725,22 +728,32 @@ def test_export_age_graded_standings(tmp_path):
         reader = csv.reader(f)
         rows = list(reader)
 
-        # Check header
-        assert rows[0] == ["Rank", "Member ID", "Name", "Races", "Avg Age-Graded %"]
+        # Check header with race columns
+        expected_header = [
+            "Rank",
+            "Member ID",
+            "Name",
+            "spring_5k",
+            "summer_8k",
+            "Avg %",
+        ]
+        assert rows[0] == expected_header
 
-        # Check first member
+        # Check first member (ran both races)
         assert rows[1][0] == "1"
         assert rows[1][1] == "M001"
         assert rows[1][2] == "John Doe"
-        assert rows[1][3] == "2"
-        assert rows[1][4] == "95.50"
+        assert rows[1][3] == "94.00"  # spring_5k
+        assert rows[1][4] == "97.00"  # summer_8k
+        assert rows[1][5] == "95.50"  # avg
 
-        # Check second member
+        # Check second member (ran only spring_5k)
         assert rows[2][0] == "2"
         assert rows[2][1] == "F001"
         assert rows[2][2] == "Jane Smith"
-        assert rows[2][3] == "1"
-        assert rows[2][4] == "98.20"
+        assert rows[2][3] == "98.20"  # spring_5k
+        assert rows[2][4] == ""  # summer_8k (not run)
+        assert rows[2][5] == "98.20"  # avg
 
 
 def test_export_age_graded_standings_creates_directory(tmp_path):
@@ -756,11 +769,12 @@ def test_export_age_graded_standings_creates_directory(tmp_path):
             races_completed=1,
             average_age_graded_percentage=95.5,
             race_details=[],
+            race_percentages_by_race={"spring_5k": 95.5},
         ),
     ]
 
     output_path = tmp_path / "subdir" / "age_graded.csv"
-    exporter.export_age_graded_standings(standings, output_path)
+    exporter.export_age_graded_standings(standings, output_path, ["spring_5k"])
 
     assert output_path.exists()
     assert output_path.parent.exists()
@@ -771,13 +785,56 @@ def test_export_age_graded_standings_empty(tmp_path):
     exporter = ResultsExporter()
 
     standings = []
+    race_names = ["spring_5k", "summer_8k"]
 
     output_path = tmp_path / "age_graded.csv"
-    exporter.export_age_graded_standings(standings, output_path)
+    exporter.export_age_graded_standings(standings, output_path, race_names)
 
     # File should be created with just header
     with open(output_path) as f:
         reader = csv.reader(f)
         rows = list(reader)
         assert len(rows) == 1  # Only header
-        assert rows[0] == ["Rank", "Member ID", "Name", "Races", "Avg Age-Graded %"]
+        expected_header = [
+            "Rank",
+            "Member ID",
+            "Name",
+            "spring_5k",
+            "summer_8k",
+            "Avg %",
+        ]
+        assert rows[0] == expected_header
+
+
+def test_export_age_graded_standings_without_race_names(tmp_path):
+    """Test exporting age-graded standings without race names (fallback format)."""
+    from krra_race_series.age_grading import AgeGradedSeriesTotal
+
+    exporter = ResultsExporter()
+
+    standings = [
+        AgeGradedSeriesTotal(
+            member_id="M001",
+            member_name="John Doe",
+            races_completed=2,
+            average_age_graded_percentage=95.5,
+            race_details=[],
+        ),
+    ]
+
+    output_path = tmp_path / "age_graded.csv"
+    exporter.export_age_graded_standings(standings, output_path)  # No race_names
+
+    with open(output_path) as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+
+        # Check header with fallback format
+        assert rows[0] == ["Rank", "Member ID", "Name", "Races", "Avg %"]
+
+        # Check data
+        assert rows[1][0] == "1"
+        assert rows[1][1] == "M001"
+        assert rows[1][2] == "John Doe"
+        assert rows[1][3] == "2"  # races_completed
+        assert rows[1][4] == "95.50"

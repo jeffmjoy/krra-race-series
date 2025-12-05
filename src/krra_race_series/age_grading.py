@@ -471,6 +471,7 @@ class AgeGradedSeriesTotal:
     races_completed: int
     average_age_graded_percentage: float
     race_details: list[AgeGradedResult]
+    race_percentages_by_race: dict[str, float] | None = None
 
 
 class AgeGradedSeriesScoring:
@@ -502,7 +503,7 @@ class AgeGradedSeriesScoring:
         return self.race_names.copy()
 
     def calculate_age_graded_standings(
-        self, max_races: int = 7
+        self, max_races: int | None = None
     ) -> list[AgeGradedSeriesTotal]:
         """Calculate age-graded standings combining all genders.
 
@@ -510,7 +511,8 @@ class AgeGradedSeriesScoring:
         Tie-break by number of races completed (more races wins).
 
         Args:
-            max_races: Maximum number of races to count (default 7)
+            max_races: Maximum number of races to count. If None, all races
+                       are included (default).
 
         Returns:
             List of age-graded series totals sorted by average percentage (descending)
@@ -534,12 +536,21 @@ class AgeGradedSeriesScoring:
                 key=lambda x: x.age_graded_percentage,
                 reverse=True,
             )
-            counted_races = sorted_results[:max_races]
+            if max_races is not None:
+                counted_races = sorted_results[:max_races]
+            else:
+                counted_races = sorted_results
 
             # Calculate average age-graded percentage
             avg_percentage = sum(r.age_graded_percentage for r in counted_races) / len(
                 counted_races
             )
+
+            # Build per-race percentage mapping
+            race_percentages = {
+                result.race_name: result.age_graded_percentage
+                for result in results_list
+            }
 
             total = AgeGradedSeriesTotal(
                 member_id=member_id,
@@ -547,6 +558,7 @@ class AgeGradedSeriesScoring:
                 races_completed=len(counted_races),
                 average_age_graded_percentage=avg_percentage,
                 race_details=counted_races,
+                race_percentages_by_race=race_percentages,
             )
             totals.append(total)
 

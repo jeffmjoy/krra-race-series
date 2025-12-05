@@ -222,12 +222,16 @@ class ResultsExporter:
         self,
         standings: list["AgeGradedSeriesTotal"],
         output_path: Path,
+        race_names: list[str] | None = None,
     ) -> None:
         """Export age-graded standings to a CSV file.
 
         Args:
             standings: List of age-graded series totals to export
             output_path: Path where the CSV file will be written
+            race_names: Optional list of race names for individual columns.
+                        If provided, creates columns for each race showing
+                        the age-graded percentage for that race.
         """
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -235,23 +239,37 @@ class ResultsExporter:
             writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
 
             # Write header
-            header = [
-                "Rank",
-                "Member ID",
-                "Name",
-                "Races",
-                "Avg %",
-            ]
+            if race_names:
+                header = ["Rank", "Member ID", "Name"] + race_names + ["Avg %"]
+            else:
+                header = ["Rank", "Member ID", "Name", "Races", "Avg %"]
             writer.writerow(header)
 
             # Write data
             for rank, total in enumerate(standings, start=1):
-                writer.writerow(
-                    [
-                        rank,
-                        self._sanitize_csv_field(total.member_id),
-                        self._sanitize_csv_field(total.member_name),
-                        total.races_completed,
-                        f"{total.average_age_graded_percentage:.2f}",
+                if race_names and total.race_percentages_by_race is not None:
+                    race_columns = [
+                        f"{total.race_percentages_by_race.get(race, 0):.2f}"
+                        if race in total.race_percentages_by_race
+                        else ""
+                        for race in race_names
                     ]
-                )
+                    writer.writerow(
+                        [
+                            rank,
+                            self._sanitize_csv_field(total.member_id),
+                            self._sanitize_csv_field(total.member_name),
+                        ]
+                        + race_columns
+                        + [f"{total.average_age_graded_percentage:.2f}"]
+                    )
+                else:
+                    writer.writerow(
+                        [
+                            rank,
+                            self._sanitize_csv_field(total.member_id),
+                            self._sanitize_csv_field(total.member_name),
+                            total.races_completed,
+                            f"{total.average_age_graded_percentage:.2f}",
+                        ]
+                    )

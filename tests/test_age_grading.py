@@ -391,6 +391,11 @@ def test_calculate_age_graded_standings_single_member() -> None:
     expected_avg = (98.04 + 97.85) / 2
     assert abs(standings[0].average_age_graded_percentage - expected_avg) < 0.01
 
+    # Verify race_percentages_by_race is populated
+    assert standings[0].race_percentages_by_race is not None
+    assert standings[0].race_percentages_by_race["spring_5k"] == 98.04
+    assert standings[0].race_percentages_by_race["summer_8k"] == 97.85
+
 
 def test_calculate_age_graded_standings_multiple_members() -> None:
     """Test age-graded standings with multiple members (mixed genders)."""
@@ -437,8 +442,42 @@ def test_calculate_age_graded_standings_multiple_members() -> None:
     assert standings[1].member_id == "M001"
 
 
+def test_calculate_age_graded_standings_all_races_by_default() -> None:
+    """Test that all races are included by default (max_races=None)."""
+    scoring = AgeGradedSeriesScoring()
+
+    # Member with 10 races
+    results = [
+        AgeGradedResult(
+            member_id="M001",
+            member_name="John Doe",
+            race_name=f"race_{i}",
+            age=35,
+            gender="M",
+            actual_time="18:30",
+            actual_seconds=1110.0,
+            distance=RaceDistance.KM_5,
+            age_factor=1.020,
+            age_graded_percentage=90.0 + i,
+            overall_place=1,
+        )
+        for i in range(10)
+    ]
+
+    scoring.add_age_graded_results(results)
+
+    # Default should include all races
+    standings = scoring.calculate_age_graded_standings()
+
+    assert len(standings) == 1
+    assert standings[0].races_completed == 10  # All 10 races included
+    # Average of 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
+    expected_avg = sum(90.0 + i for i in range(10)) / 10
+    assert abs(standings[0].average_age_graded_percentage - expected_avg) < 0.01
+
+
 def test_calculate_age_graded_standings_max_races() -> None:
-    """Test that only top N races count toward age-graded standings."""
+    """Test that only top N races count when max_races is set."""
     scoring = AgeGradedSeriesScoring()
 
     # Member with 3 races

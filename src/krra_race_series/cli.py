@@ -134,7 +134,10 @@ def main() -> None:
         print(f"  {len(age_graded_standings)} members ranked")
 
         age_graded_output = args.output / "age_graded.csv"
-        exporter.export_age_graded_standings(age_graded_standings, age_graded_output)
+        age_graded_race_names = age_graded_series.get_race_names()
+        exporter.export_age_graded_standings(
+            age_graded_standings, age_graded_output, age_graded_race_names
+        )
         print(f"✓ Age-graded standings exported to {age_graded_output}")
 
         # Display age-graded summary
