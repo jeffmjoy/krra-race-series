@@ -40,7 +40,7 @@ class RaceDistance(Enum):
 #
 # Note: The factors below are simplified approximations at 5-year intervals
 # based on WMA 2020 tables. For production use, consider using the full
-# year-by-year tables available from the WMA GitHub repository.
+# year-by-year tables.
 
 # World-class reference times (in seconds) for open age group
 # Based on WMA open age standards (approximate world-class performances)
