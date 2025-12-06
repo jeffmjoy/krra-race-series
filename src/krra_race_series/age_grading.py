@@ -449,6 +449,11 @@ class AgeGradingCalculator:
 
         Args:
             factor_year: Year of the age-grading factors to use (default: 2020)
+
+        Note:
+            Currently, only the 2020 age-grading tables are supported.
+            The factor_year parameter is a placeholder for future functionality.
+            TODO: Implement selection of age-grading tables based on factor_year.
         """
         self.factor_year = factor_year
 
@@ -493,11 +498,14 @@ class AgeGradingCalculator:
         # Therefore: age_graded % = (open_standard / factor / actual_time) * 100
         world_class_time = WORLD_CLASS_TIMES.get(distance, {}).get(member.gender)
         if not world_class_time:
-            # Fallback to simplified calculation if no world-class time available
-            age_graded_percentage = (1.0 / age_factor) * 100.0
-        else:
-            age_standard_time = world_class_time / age_factor
-            age_graded_percentage = (age_standard_time / actual_seconds) * 100.0
+            # Raise exception - age-graded rankings require world-class times
+            raise ValueError(
+                f"World-class time not found for distance {distance.value} "
+                f"and gender {member.gender}. Cannot calculate age-graded percentage."
+            )
+
+        age_standard_time = world_class_time / age_factor
+        age_graded_percentage = (age_standard_time / actual_seconds) * 100.0
 
         return AgeGradedResult(
             member_id=member.member_id,
@@ -540,9 +548,9 @@ class AgeGradedSeriesScoring:
             results: Age-graded results from a race
         """
         self.all_age_graded_results.extend(results)
-        # Track race names
-        if results:
-            race_name = results[0].race_name
+        # Track all unique race names in the batch
+        for result in results:
+            race_name = result.race_name
             if race_name not in self.race_names:
                 self.race_names.append(race_name)
 
@@ -589,9 +597,15 @@ class AgeGradedSeriesScoring:
                 reverse=True,
             )
             if max_races is not None:
+                if max_races <= 0:
+                    raise ValueError("max_races must be a positive integer")
                 counted_races = sorted_results[:max_races]
             else:
                 counted_races = sorted_results
+
+            # Skip if no races to count
+            if not counted_races:
+                continue
 
             # Calculate average age-graded percentage
             avg_percentage = sum(r.age_graded_percentage for r in counted_races) / len(

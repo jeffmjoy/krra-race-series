@@ -99,6 +99,8 @@ python -m krra_race_series.cli \
 
 To use a different year of age-grading factors:
 
+> **Note:** The `--age-grading-year` parameter is currently a placeholder. Only the 2020 age-grading factors are supported; specifying a different year will have no effect.
+
 ```bash
 python -m krra_race_series.cli \
   --members data/members/members.csv \

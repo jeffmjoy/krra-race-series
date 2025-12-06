@@ -49,7 +49,7 @@ def main() -> None:
         "--age-grading-year",
         type=int,
         default=2020,
-        help="Year of WMA age-grading factors to use (default: 2020)",
+        help="Year of WMA age-grading factors to use (only 2020 is available)",
     )
 
     args = parser.parse_args()

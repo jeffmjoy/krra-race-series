@@ -249,7 +249,7 @@ class ResultsExporter:
             for rank, total in enumerate(standings, start=1):
                 if race_names and total.race_percentages_by_race is not None:
                     race_columns = [
-                        f"{total.race_percentages_by_race.get(race, 0):.2f}"
+                        f"{total.race_percentages_by_race[race]:.2f}"
                         if race in total.race_percentages_by_race
                         else ""
                         for race in race_names
