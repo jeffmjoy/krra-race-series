@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 class RaceDistance(Enum):
     """Standard race distances supported for age-grading."""
 
+    MILE = "Mile"
     KM_5 = "5K"
     KM_8 = "8K"
     KM_10 = "10K"
@@ -27,15 +28,27 @@ class RaceDistance(Enum):
 
 
 # WMA 2020 Age-Grading Factors
+# Source: World Masters Athletics (WMA) age-grading tables
+# https://github.com/AlanLyttonJones/Age-Grade-Tables
+# https://world-masters-athletics.org/
+#
 # These are multiplicative factors for converting actual time to age-graded time
 # Format: {distance: {gender: {age: factor}}}
 # Factor represents the ratio: (open_standard / age_standard)
 # where open_standard is the world-class time for that distance
 # A higher factor means the age standard is slower (older age)
+#
+# Note: The factors below are simplified approximations at 5-year intervals
+# based on WMA 2020 tables. For production use, consider using the full
+# year-by-year tables available from the WMA GitHub repository.
 
 # World-class reference times (in seconds) for open age group
-# These are approximate based on world records and WMA standards
+# Based on WMA open age standards (approximate world-class performances)
 WORLD_CLASS_TIMES = {
+    RaceDistance.MILE: {
+        "M": 3 * 60 + 43,  # 3:43 (approximate WMA open standard)
+        "F": 4 * 60 + 12,  # 4:12 (approximate WMA open standard)
+    },
     RaceDistance.KM_5: {
         "M": 12 * 60 + 51,  # 12:51 (approximate)
         "F": 14 * 60 + 44,  # 14:44 (approximate)
@@ -58,10 +71,45 @@ WORLD_CLASS_TIMES = {
     },
 }
 
-# Simplified age-grading factors based on WMA 2020 tables
-# For a complete implementation, you would load all factors from WMA tables
-# These are sample factors showing the general pattern
+# Age-grading factors for each distance and gender
+# Source: Derived from WMA 2020 age-grading tables
+# These are simplified approximations at 5-year intervals
 AGE_GRADING_FACTORS = {
+    RaceDistance.MILE: {
+        "M": {
+            # Age: factor (simplified - actual tables have year-by-year)
+            20: 1.000,
+            25: 1.000,
+            30: 1.004,
+            35: 1.019,
+            40: 1.046,
+            45: 1.086,
+            50: 1.143,
+            55: 1.216,
+            60: 1.309,
+            65: 1.428,
+            70: 1.583,
+            75: 1.785,
+            80: 2.055,
+            85: 2.415,
+        },
+        "F": {
+            20: 1.000,
+            25: 1.000,
+            30: 1.007,
+            35: 1.025,
+            40: 1.055,
+            45: 1.098,
+            50: 1.157,
+            55: 1.235,
+            60: 1.336,
+            65: 1.467,
+            70: 1.637,
+            75: 1.858,
+            80: 2.147,
+            85: 2.524,
+        },
+    },
     RaceDistance.KM_5: {
         "M": {
             # Age: factor (simplified - actual tables have year-by-year)
@@ -250,11 +298,15 @@ def infer_race_distance(race_name: str) -> RaceDistance | None:
         RaceDistance.KM_5
         >>> infer_race_distance("county_half_marathon")
         RaceDistance.HALF_MARATHON
+        >>> infer_race_distance("mile_run")
+        RaceDistance.MILE
     """
     race_name_lower = race_name.lower()
 
-    # Check for specific patterns
-    if "5k" in race_name_lower or "5_k" in race_name_lower:
+    # Check for specific patterns (order matters - check more specific first)
+    if "mile" in race_name_lower and "half" not in race_name_lower:
+        return RaceDistance.MILE
+    elif "5k" in race_name_lower or "5_k" in race_name_lower:
         return RaceDistance.KM_5
     elif "8k" in race_name_lower or "8_k" in race_name_lower:
         return RaceDistance.KM_8

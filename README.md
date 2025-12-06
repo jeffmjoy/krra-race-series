@@ -76,7 +76,15 @@ This generates category standings files (e.g., `M_overall.csv`, `F_30-39.csv`) a
 
 #### Age-Graded Rankings
 
-The age-graded rankings use World Masters Athletics (WMA) 2020 age-grading factors to compare performances across ages and genders.
+The age-graded rankings use World Masters Athletics (WMA) 2020 age-grading factors to compare performances across ages and genders. This allows fair comparison of a 25-year-old woman, a 45-year-old man, and a 70-year-old runner on equal footing.
+
+**Supported distances:** Mile, 5K, 8K, 10K, Half Marathon, Marathon
+
+**Age-grading factor source:** The age-grading factors are based on the WMA 2020 tables available at:
+- GitHub: https://github.com/AlanLyttonJones/Age-Grade-Tables
+- WMA Official: https://world-masters-athletics.org/
+
+The implementation uses simplified approximations at 5-year age intervals derived from these tables. For production use with precise age-grading, consider loading the full year-by-year tables from the WMA repository.
 
 To generate only specific categories:
 

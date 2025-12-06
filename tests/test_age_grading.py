@@ -23,6 +23,14 @@ def test_infer_race_distance_5k() -> None:
     assert infer_race_distance("charity_5_k") == RaceDistance.KM_5
 
 
+def test_infer_race_distance_mile() -> None:
+    """Test distance inference for mile races."""
+    assert infer_race_distance("mile_run") == RaceDistance.MILE
+    assert infer_race_distance("track_mile") == RaceDistance.MILE
+    assert infer_race_distance("road_mile") == RaceDistance.MILE
+    assert infer_race_distance("Mile") == RaceDistance.MILE
+
+
 def test_infer_race_distance_8k() -> None:
     """Test distance inference for 8K races."""
     assert infer_race_distance("summer_8k") == RaceDistance.KM_8
