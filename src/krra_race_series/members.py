@@ -140,6 +140,9 @@ class MemberRegistry:
             score = fuzz.token_sort_ratio(name_normalized, member.full_name.lower())
             # Convert to 0.0-1.0 scale
             normalized_score = score / 100.0
+            if normalized_score == 1.0:
+                # Early exit on perfect match
+                return MatchResultDict(member=member, confidence=1.0, is_ambiguous=False)
             scores.append((member, normalized_score))
 
         # Sort by score descending
