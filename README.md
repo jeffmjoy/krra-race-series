@@ -74,6 +74,65 @@ python -m krra_race_series.cli \
 
 This generates category standings files (e.g., `M_overall.csv`, `F_30-39.csv`) and an `age_graded.csv` file with combined gender rankings based on age-graded performance.
 
+#### Fuzzy Name Matching
+
+The system uses fuzzy matching to handle name variations between race results and the member list (e.g., "Jeff" vs "Jeffrey", "Sara" vs "Sarah", truncated hyphenated names).
+
+**Confidence Scoring:**
+
+- Each match receives a confidence score from 0.0 to 1.0 (1.0 = exact match)
+- Default minimum confidence threshold: 0.70
+- Matches below the threshold are rejected
+
+**Ambiguity Detection:**
+
+- The system flags matches where multiple members have similar scores
+- Default ambiguity threshold: 0.05 (difference between top two scores)
+
+**Tuning thresholds:**
+
+```bash
+python -m krra_race_series.cli \
+  --members data/members/members.csv \
+  --races data/race_results/*.csv \
+  --min-confidence 0.80 \
+  --flag-threshold 0.10
+```
+
+**Exporting flagged matches for review:**
+
+```bash
+python -m krra_race_series.cli \
+  --members data/members/members.csv \
+  --races data/race_results/*.csv \
+  --unmatched-report data/output/flagged_matches.csv
+```
+
+This exports a CSV with all low-confidence and ambiguous matches for manual review.
+
+**Name corrections file:**
+
+For recurring name variations, create a CSV file mapping race result names to member names:
+
+```csv
+race_name,member_name
+Jeff Davis,Jeffrey Davis
+Sara Jones,Sarah Jones
+Bob Miller,Robert Miller
+Emily Brown,Emily Brown-Taylor
+```
+
+Then use it with:
+
+```bash
+python -m krra_race_series.cli \
+  --members data/members/members.csv \
+  --races data/race_results/*.csv \
+  --name-corrections data/name_corrections.csv
+```
+
+Name corrections take precedence over fuzzy matching and are applied with confidence = 1.0.
+
 #### Age-Graded Rankings
 
 The age-graded rankings use World Masters Athletics (WMA) 2020 age-grading factors to compare performances across ages and genders.

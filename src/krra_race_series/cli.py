@@ -52,21 +52,72 @@ def main() -> None:
         help="Year of WMA age-grading factors to use (only 2020 is available)",
     )
 
+    parser.add_argument(
+        "--min-confidence",
+        type=float,
+        default=0.70,
+        help=(
+            "Minimum confidence score (0.0-1.0) to accept a fuzzy name "
+            "match (default: 0.70)"
+        ),
+    )
+
+    parser.add_argument(
+        "--flag-threshold",
+        type=float,
+        default=0.05,
+        help="Max score difference to flag ambiguous matches (default: 0.05)",
+    )
+
+    parser.add_argument(
+        "--unmatched-report",
+        type=Path,
+        help="Optional: Export low-confidence/ambiguous matches to CSV for review",
+    )
+
+    parser.add_argument(
+        "--name-corrections",
+        type=Path,
+        help="Optional: Path to CSV file with name corrections (race_name,member_name)",
+    )
+
     args = parser.parse_args()
 
+    # Validate min-confidence and flag-threshold ranges
+    if not 0.0 <= args.min_confidence <= 1.0:
+        parser.error("--min-confidence must be between 0.0 and 1.0")
+    if not 0.0 <= args.flag_threshold <= 1.0:
+        parser.error("--flag-threshold must be between 0.0 and 1.0")
     # Load members
     print(f"Loading members from {args.members}...")
     member_registry = MemberRegistry()
     member_registry.load_from_csv(args.members)
     print(f"Loaded {len(member_registry.get_all_members())} members")
 
+    # Load name corrections if provided
+    if args.name_corrections:
+        if args.name_corrections.exists():
+            print(f"Loading name corrections from {args.name_corrections}...")
+            member_registry.load_name_corrections(args.name_corrections)
+            print(f"Loaded {len(member_registry.name_corrections)} name corrections")
+        else:
+            print(f"Warning: Name corrections file not found: {args.name_corrections}")
+
     # Initialize components
-    matcher = FinisherMatcher(member_registry)
+    matcher = FinisherMatcher(
+        member_registry,
+        min_confidence=args.min_confidence,
+        ambiguity_threshold=args.flag_threshold,
+    )
     calculator = PointsCalculator()
     series = SeriesScoring()
     age_grading_calc = AgeGradingCalculator(factor_year=args.age_grading_year)
     age_graded_series = AgeGradedSeriesScoring()
     exporter = ResultsExporter()
+
+    # Track flagged matches for reporting
+    # Format: (race, name, confidence, reason)
+    flagged_matches: list[tuple[str, str, float, str]] = []
 
     # Process each race
     loader = RaceResultsLoader()
@@ -78,7 +129,40 @@ def main() -> None:
         # Match finishers
         matches = matcher.match_all(race.results)
         matched_count = sum(1 for m in matches if m.matched)
+        unmatched_count = sum(1 for m in matches if not m.matched)
+        ambiguous_count = sum(1 for m in matches if m.is_ambiguous)
+        low_conf_count = sum(1 for m in matches if m.matched and m.confidence < 0.90)
+
         print(f"  {matched_count} matched with members")
+        if unmatched_count > 0:
+            print(f"  ⚠ {unmatched_count} unmatched")
+        if ambiguous_count > 0:
+            print(f"  ⚠ {ambiguous_count} ambiguous matches")
+        if low_conf_count > 0:
+            print(f"  ⚠ {low_conf_count} low-confidence matches (<90%)")
+
+        # Track flagged matches (ambiguous or low-confidence only)
+        for match in matches:
+            if match.matched and match.is_ambiguous:
+                member_name = match.member.full_name if match.member else "N/A"
+                flagged_matches.append(
+                    (
+                        race.name,
+                        match.race_result.name,
+                        match.confidence,
+                        f"ambiguous (matched: {member_name})",
+                    )
+                )
+            elif match.matched and match.confidence < 0.90:
+                member_name = match.member.full_name if match.member else "N/A"
+                flagged_matches.append(
+                    (
+                        race.name,
+                        match.race_result.name,
+                        match.confidence,
+                        f"low confidence (matched: {member_name})",
+                    )
+                )
 
         # Calculate points
         race_points = calculator.calculate_race_points(matches, race.name)
@@ -163,6 +247,24 @@ def main() -> None:
             )
         if len(cat_totals) > 5:
             print(f"  ... and {len(cat_totals) - 5} more")
+
+    # Export unmatched report if requested
+    if args.unmatched_report and flagged_matches:
+        print(f"\nExporting flagged matches to {args.unmatched_report}...")
+        import csv
+
+        args.unmatched_report.parent.mkdir(parents=True, exist_ok=True)
+        with open(args.unmatched_report, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
+            writer.writerow(["Race", "Name", "Confidence", "Reason"])
+            for race_name, name, confidence, reason in flagged_matches:
+                writer.writerow([race_name, name, f"{confidence:.2f}", reason])
+        print(f"✓ {len(flagged_matches)} flagged matches exported")
+    elif flagged_matches:
+        print(
+            f"\n⚠ {len(flagged_matches)} flagged matches "
+            f"(use --unmatched-report to export details)"
+        )
 
     print(f"\n✓ Complete! Category standings exported to {args.output}/")
 
