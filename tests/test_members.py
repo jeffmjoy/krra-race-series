@@ -265,6 +265,7 @@ def test_fuzzy_match_below_threshold():
 
     assert result["member"] is None
     assert result["confidence"] < 0.70
+    assert result["is_ambiguous"] is False
 
 
 def test_ambiguity_detection():

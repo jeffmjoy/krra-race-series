@@ -175,6 +175,8 @@ def test_min_confidence_threshold():
     match = matcher.match_finisher(race_result)
 
     assert match.matched is False
+    assert match.confidence < 0.95
+    assert match.is_ambiguous is False
 
 
 def test_custom_thresholds():
