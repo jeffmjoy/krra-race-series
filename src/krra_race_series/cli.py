@@ -83,6 +83,11 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    # Validate min-confidence and flag-threshold ranges
+    if not 0.0 <= args.min_confidence <= 1.0:
+        parser.error("--min-confidence must be between 0.0 and 1.0")
+    if not 0.0 <= args.flag_threshold <= 1.0:
+        parser.error("--flag-threshold must be between 0.0 and 1.0")
     # Load members
     print(f"Loading members from {args.members}...")
     member_registry = MemberRegistry()
