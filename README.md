@@ -118,7 +118,7 @@ For recurring name variations, create a CSV file mapping race result names to me
 race_name,member_name
 Jeff Davis,Jeffrey Davis
 Sara Jones,Sarah Jones
-Bob Miller, Robert Miller
+Bob Miller,Robert Miller
 Emily Brown,Emily Brown-Taylor
 ```
 

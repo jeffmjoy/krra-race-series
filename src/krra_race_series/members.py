@@ -1,5 +1,7 @@
 """Module for managing KRRA member data."""
 
+from __future__ import annotations
+
 import csv
 from dataclasses import dataclass
 from pathlib import Path
@@ -11,7 +13,7 @@ from rapidfuzz import fuzz
 class MatchResultDict(TypedDict):
     """Type definition for fuzzy match result."""
 
-    member: "Member | None"
+    member: Member | None
     confidence: float
     is_ambiguous: bool
 
@@ -143,6 +145,8 @@ class MemberRegistry:
         # Sort by score descending
         scores.sort(key=lambda x: x[1], reverse=True)
 
+        if not scores:
+            return MatchResultDict(member=None, confidence=0.0, is_ambiguous=False)
         best_member, best_score = scores[0]
 
         # Check if match meets minimum confidence threshold
